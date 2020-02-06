@@ -58,8 +58,7 @@ resource "null_resource" "store_storage_account_key" {
       -a ${var.storage_account} \
       -b ${var.subscription_id} \
       -v ${var.vault_name} \
-      -n ${var.storage_account_key_secret_name} \
-      -c ${var.vault_subscription_id}
+      -n ${var.storage_account_key_secret_name}
     EOT
   }
 
@@ -68,7 +67,6 @@ resource "null_resource" "store_storage_account_key" {
     subscription_id                 = "${var.subscription_id}"
     vault_name                      = "${var.vault_name}"
     storage_account_key_secret_name = "${var.storage_account_key_secret_name}"
-    vault_subscription_id           = "${var.vault_subscription_id}"
   }
 
   depends_on = ["azurerm_storage_account.account"]

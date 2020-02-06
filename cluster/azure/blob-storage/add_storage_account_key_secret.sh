@@ -8,7 +8,6 @@ do
     b) SUBSCRIPTION_ID=${OPTARG};;
     v) VAULT_NAME=${OPTARG};;
     n) SECRET_NAME=${OPTARG};;
-    c) VAULT_SUBSCRIPTION_ID=${OPTARG};;
     *) echo "ERROR: Please refer to usage guide on GitHub" >&2
         exit 1 ;;
     esac
@@ -43,12 +42,6 @@ if [ -z "$SUBSCRIPTION_ID" ]; then
     exit 1
 else
     echo "SUBSCRIPTION_ID=$SUBSCRIPTION_ID"
-fi
-if [ -z "$VAULT_SUBSCRIPTION_ID" ]; then
-    echo "usage: $0 -c <VAULT_SUBSCRIPTION_ID>"
-    exit 1
-else
-    echo "VAULT_SUBSCRIPTION_ID=$VAULT_SUBSCRIPTION_ID"
 fi
 
 echo "retrieving storage account"
