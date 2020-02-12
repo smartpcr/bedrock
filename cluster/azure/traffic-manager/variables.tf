@@ -38,8 +38,3 @@ variable "probe_path" {
   type = "string"
   default = "/"
 }
-
-variable "dnszone_created" {
-  type        = "string"
-  description = "output from cosmosdb module, must be true in order to proceed"
-}
