@@ -1,15 +1,10 @@
-variable "dns_subscription_id" {
+variable "subscription_id" {
   type    = "string"
   default = ""       # reuse existing subscription if empty
 }
 
 variable "resource_group_name" {
   type = "string"
-}
-
-variable "location" {
-  description = "The location/region where the core network will be created. The full list of Azure regions can be found at https://azure.microsoft.com/regions"
-  type        = "string"
 }
 
 variable "name" {
@@ -31,21 +26,4 @@ variable "env_name" {
   type        = "string"
   default     = "dev"
   description = "name of targeting env"
-}
-
-variable "traffic_manager_name" {
-  type = "string"
-  description = "name of the traffic manager"
-  default = ""
-}
-
-variable "service_names" {
-  type = "string"
-  description = "comma-separated name of the services that expose to internet via ingress"
-  default = ""
-}
-
-variable "recreate_cname_records" {
-  type = "string"
-  default = "true"
 }

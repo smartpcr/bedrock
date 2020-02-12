@@ -1,13 +1,28 @@
-variable "subscription_id" {
-  type = "string"
+variable "dns_subscription_id" {
+  type    = "string"
   default = ""
 }
 
-variable "resource_group_name" {
+variable "dns_resource_group_name" {
   type = "string"
 }
 
-variable "location" {
+variable "dns_zone_name" {
+  type        = "string"
+  description = "subdomain, i.e. dev.space.microsoft.com"
+  default     = ""
+}
+
+variable "tm_subscription_id" {
+  type    = "string"
+  default = ""
+}
+
+variable "tm_resource_group_name" {
+  type = "string"
+}
+
+variable "tm_location" {
   description = "The location/region where the core network will be created. The full list of Azure regions can be found at https://azure.microsoft.com/regions"
   type        = "string"
 }
@@ -17,24 +32,23 @@ variable "traffic_manager_name" {
 }
 
 variable "service_names" {
-  type = "string"
+  type        = "string"
   description = "comma-separated service names that is exposed to internet via ingress, i.e. product-catalog-api"
-  default = ""
+  default     = ""
 }
 
 variable "service_suffix" {
-  type = "string"
+  type        = "string"
   description = "suffix applied to cluster/env, such as dev1, dev2, so that ingress host name will be: product-catalog-api-dev2.dev.space.microsoft.com"
-  default = ""
-}
-
-variable "dns_zone_name" {
-  type = "string"
-  description = "subdomain, i.e. dev.space.microsoft.com"
-  default = ""
+  default     = ""
 }
 
 variable "probe_path" {
-  type = "string"
+  type    = "string"
   default = "/"
+}
+
+variable "recreate_cname_records" {
+  type    = "string"
+  default = "true"
 }
