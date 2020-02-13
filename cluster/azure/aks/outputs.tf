@@ -13,10 +13,6 @@ output "kube_config_admin" {
   value = "${azurerm_kubernetes_cluster.cluster.kube_admin_config_raw}"
 }
 
-output "cluster_created" {
-  value = "${join("",azurerm_kubernetes_cluster.cluster.*.id)}"
-}
-
 output "kubeconfig_done" {
   value = "${join("",null_resource.cluster_credentials.*.id)}"
 }
