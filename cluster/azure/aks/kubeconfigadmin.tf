@@ -1,4 +1,3 @@
-
 resource "null_resource" "cluster_credentials_admin" {
   count = "${var.kubeconfig_to_disk ? 1 : 0}"
 
@@ -16,6 +15,7 @@ resource "null_resource" "cluster_credentials_admin" {
   triggers = {
     kubeconfig_to_disk  = "${var.kubeconfig_to_disk}"
     kubeconfig_recreate = "${var.kubeconfig_recreate}"
+    cluster_created     = "${var.cluster_created}"
   }
 
   depends_on = ["azurerm_kubernetes_cluster.cluster"]

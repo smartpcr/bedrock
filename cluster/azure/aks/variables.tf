@@ -167,3 +167,8 @@ variable "dev_space_name" {
   type = "string"
   default = "dev"
 }
+
+variable "cluster_created" {
+  type        = "string"
+  description = "output from cosmosdb module, must be true in order to proceed"
+}
