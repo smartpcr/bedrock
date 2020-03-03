@@ -18,7 +18,7 @@ variable "cosmosdb_created" {
   description = "output from cosmosdb module, must be true in order to proceed"
 }
 
-variable "cosmosdb_settings" {
+variable "cosmos_db_settings" {
   type        = "string"
   description = "map of dbname to collections in base64 format, each collection contains list of stored procedures that contains the following values: spName, secretName, secretVersion"
 }
