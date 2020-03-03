@@ -310,7 +310,7 @@ if ($null -ne $SubscriptionId -and $SubscriptionId -ne "") {
     az account set -s $SubscriptionId
 }
 
-$json = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($DbCollectionSettings))
+$json = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($DbSettings))
 Write-Host "db setting as json: $json"
 
 $dbSettingsArray = [array](ConvertFrom-Json $json -Depth 10)
@@ -331,7 +331,8 @@ $dbSettingsArray | ForEach-Object {
     $collections | ForEach-Object {
         $collection = $_
         $collectionName = $collection.name
-        if ($null -ne $collection["storedProcedures"]) {
+        $haveProcedures = [bool]($collection.PSobject.Properties.name -match "storedProcedures")
+        if ($haveProcedures) {
             [array]$storedProcedures = $collection.storedProcedures
             if ($storedProcedures.Count -gt 0) {
                 Write-Host "Creating stored procedures for collection: $($collectionName), total of $($storedProcedures.Count) stored procedures found."
