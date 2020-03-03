@@ -13,21 +13,6 @@ variable "cosmos_db_name" {
   description = "CosmosDB name"
 }
 
-variable "cosmos_db_collection" {
-  type        = "string"
-  description = "name of collection"
-}
-
-variable "cosmos_db_sp_names" {
-  type        = "string"
-  description = "list of sp names and definition secret separated by ',', i.e. bulkDelete=products-bulk-delete,touchDocuments=products-touch-documents"
-}
-
-variable "cosmos_db_sp_versions" {
-  type        = "string"
-  description = "list of kv versions for sp definitions, will trigger new deployment when it got changed"
-}
-
 variable "vault_name" {
   type        = "string"
   description = "key vault to store auth key of cosmosdb connection"
@@ -36,4 +21,9 @@ variable "vault_name" {
 variable "cosmosdb_created" {
   type        = "string"
   description = "output from cosmosdb module, must be true in order to proceed"
+}
+
+variable "cosmosdb_settings" {
+  type        = "string"
+  description = "map of dbname to collections in base64 format, each collection contains list of stored procedures that contains the following values: spName, secretName, secretVersion"
 }
