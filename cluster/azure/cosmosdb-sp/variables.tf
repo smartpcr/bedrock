@@ -8,11 +8,6 @@ variable "cosmosdb_subscription_id" {
   default = ""       # reuse existing subscription if empty
 }
 
-variable "cosmos_db_name" {
-  type        = "string"
-  description = "CosmosDB name"
-}
-
 variable "vault_name" {
   type        = "string"
   description = "key vault to store auth key of cosmosdb connection"
