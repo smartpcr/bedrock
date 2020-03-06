@@ -5,7 +5,7 @@ variable "cosmos_db_account" {
 
 variable "cosmosdb_subscription_id" {
   type    = "string"
-  default = ""       # reuse existing subscription if empty
+  default = "" # reuse existing subscription if empty
 }
 
 variable "cosmos_db_name" {
@@ -34,6 +34,11 @@ variable "vault_name" {
 }
 
 variable "cosmosdb_created" {
+  type        = "string"
+  description = "output from cosmosdb module, must be true in order to proceed"
+}
+
+variable "cosmosdb_collection_stored" {
   type        = "string"
   description = "output from cosmosdb module, must be true in order to proceed"
 }
