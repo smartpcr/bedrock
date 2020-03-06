@@ -13,6 +13,6 @@ resource "null_resource" "deploy_stored_procedures" {
     cosmos_db_sp_names         = "${var.cosmos_db_sp_names}"
     cosmos_db_sp_versions      = "${var.cosmos_db_sp_versions}"
     cosmosdb_created           = "${var.cosmosdb_created}"
-    cosmosdb_collection_stored = "${var.cosmosdb_collection_stored}"
+    cosmosdb_collection_created = "${var.cosmosdb_collection_created}"
   }
 }

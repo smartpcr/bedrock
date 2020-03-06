@@ -38,7 +38,7 @@ variable "cosmosdb_created" {
   description = "output from cosmosdb module, must be true in order to proceed"
 }
 
-variable "cosmosdb_collection_stored" {
+variable "cosmosdb_collection_created" {
   type        = "string"
   description = "output from cosmosdb module, must be true in order to proceed"
 }
