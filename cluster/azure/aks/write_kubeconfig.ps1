@@ -7,8 +7,6 @@ param(
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
-Install-Module powershell-yaml -AllowClobber -Confirm:$false -Force
-Import-Module powershell-yaml -Force
 
 if ($IsAdmin -ieq "true") {
     Write-Host "connect to aks as cluster admin"

@@ -1,9 +1,7 @@
 param(
     [string]$AccountName,
     [string]$SubscriptionId,
-    [string]$DbName,
-    [string]$CollectionName,
-    [string]$SpNames,
+    [string]$DbSettings,
     [string]$VaultName
 )
 
@@ -312,53 +310,71 @@ if ($null -ne $SubscriptionId -and $SubscriptionId -ne "") {
     az account set -s $SubscriptionId
 }
 
+$json = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($DbSettings))
+Write-Host "db setting as json: $json"
+
+$dbSettingsArray = [array](ConvertFrom-Json $json -Depth 10)
+if ($dbSettingsArray.Count -eq 0) {
+    throw "invalid db settings"
+}
+
+Write-Host "retrieve cosmosdb auth key..."
 $AuthKey = $(az keyvault secret show --vault-name $VaultName --name "$($AccountName)-AuthKey" | ConvertFrom-Json).value
 $ResourceType = 'sprocs'
-$SpNameSecretArray = $SpNames.Split(",", [System.StringSplitOptions]::RemoveEmptyEntries)
 
-$SpNameSecretArray | ForEach-Object {
-    $SpNameSecretPair = $_.Trim().Split("=", [System.StringSplitOptions]::RemoveEmptyEntries)
-    $SpName = $SpNameSecretPair[0].Trim()
-    if ($SpNameSecretPair.Count -gt 1) {
-        $SpSecretName = $SpNameSecretPair[1]
-    }
-    else {
-        $SpSecretName = $SpName
-    }
+$dbSettingsArray | ForEach-Object {
+    $dbSetting = $_
+    $dbName = $dbSetting.name
+    $collections = $dbSetting.collections
+    Write-Host "checking stored procedures for db: $($dbName), total of $($collections.Count) collections found."
 
-    Write-Host "Installing $ResourceType '$SpName' to Cosmos DB collection '$CollectionName' in database '$DbName'..."
+    $collections | ForEach-Object {
+        $collection = $_
+        $collectionName = $collection.name
+        $haveProcedures = [bool]($collection.PSobject.Properties.name -match "storedProcedures")
+        if ($haveProcedures) {
+            [array]$storedProcedures = $collection.storedProcedures
+            if ($storedProcedures.Count -gt 0) {
+                Write-Host "Creating stored procedures for collection: $($collectionName), total of $($storedProcedures.Count) stored procedures found."
+                $storedProcedures | ForEach-Object {
+                    $sp = $_
+                    $spName = $sp.spName
+                    $spSecretName = $sp.SpSecretName
+                    Write-Host "Installing $ResourceType '$spName' to Cosmos DB collection '$($dbName)/$($collectionName)'..."
+                    $spDefinition = $(az keyvault secret show --vault-name $VaultName --name $spSecretName | ConvertFrom-Json).value | FromBase64
+                    $spJson = @{
+                        id   = $SpName
+                        body = $SpDefinition
+                    } | ConvertTo-Json
 
-    $SpDefinition = $(az keyvault secret show --vault-name $VaultName --name $SpSecretName | ConvertFrom-Json).value | FromBase64
+                    Write-Host "`n`n$($spJson)`n`n"
 
-    $spJson = @{
-        id = $SpName
-        body = $SpDefinition
-    } | ConvertTo-Json
+                    $createResult = SubmitCosmosDbApiRequest `
+                        -Verb 'POST' `
+                        -ResourceId "dbs/$dbName/colls/$collectionName" `
+                        -ResourceType $ResourceType `
+                        -Url "https://$AccountName.documents.azure.com/dbs/$dbName/colls/$collectionName/$ResourceType" `
+                        -Key $AuthKey `
+                        -BodyJson $spJson
 
-    Write-Host $spJson
-
-    $createResult = SubmitCosmosDbApiRequest `
-        -Verb 'POST' `
-        -ResourceId "dbs/$DbName/colls/$CollectionName" `
-        -ResourceType $ResourceType `
-        -Url "https://$AccountName.documents.azure.com/dbs/$DbName/colls/$CollectionName/$ResourceType" `
-        -Key $AuthKey `
-        -BodyJson $spJson
-
-    # If that failed because the object already exists, update the object
-    if ($createResult -eq 'AlreadyExists') {
-        Write-Host "$ObjectType already exists. Updating..."
-        $spUpdated = Retry(3) {
-            SubmitCosmosDbApiRequest `
-                -Verb 'PUT' `
-                -ResourceId "dbs/$DbName/colls/$CollectionName/$ResourceType/$SpName" `
-                -ResourceType $ResourceType `
-                -Url "https://$AccountName.documents.azure.com/dbs/$DbName/colls/$CollectionName/$ResourceType/$SpName" `
-                -Key $AuthKey `
-                -BodyJson $spJson | Out-Null
-        }
-        if (!$spUpdated) {
-            throw "Failed to update stored procedure $SpName"
+                    # If that failed because the object already exists, update the object
+                    if ($createResult -eq 'AlreadyExists') {
+                        Write-Host "$ObjectType already exists. Updating..."
+                        $spUpdated = Retry(3) {
+                            SubmitCosmosDbApiRequest `
+                                -Verb 'PUT' `
+                                -ResourceId "dbs/$dbName/colls/$collectionName/$ResourceType/$spName" `
+                                -ResourceType $ResourceType `
+                                -Url "https://$AccountName.documents.azure.com/dbs/$dbName/colls/$collectionName/$ResourceType/$spName" `
+                                -Key $AuthKey `
+                                -BodyJson $spJson | Out-Null
+                        }
+                        if (!$spUpdated) {
+                            throw "Failed to update stored procedure $spName"
+                        }
+                    }
+                }
+            }
         }
     }
 }

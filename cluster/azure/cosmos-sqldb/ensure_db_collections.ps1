@@ -52,7 +52,7 @@ $dbSettingsArray | ForEach-Object {
                     --throughput $collection.throughput
             }
             else {
-                Write-Host "creating collection $($collection.name) with partition key: $($collection.partitonKey)"
+                Write-Host "creating collection $($collection.name) with partition key: $($collection.partitionKey)"
                 az cosmosdb collection create `
                     --name $AccountName `
                     --db-name $dbName `
