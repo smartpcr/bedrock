@@ -320,7 +320,6 @@ if ($dbSettingsArray.Count -eq 0) {
 
 Write-Host "retrieve cosmosdb auth key..."
 $AuthKey = $(az keyvault secret show --vault-name $VaultName --name "$($AccountName)-AuthKey" | ConvertFrom-Json).value
-$ResourceType = 'sprocs'
 
 $dbSettingsArray | ForEach-Object {
     $dbSetting = $_
@@ -333,6 +332,7 @@ $dbSettingsArray | ForEach-Object {
         $collectionName = $collection.name
         $haveProcedures = [bool]($collection.PSobject.Properties.name -match "storedProcedures")
         if ($haveProcedures) {
+            $ResourceType = "sprocs"
             [array]$storedProcedures = $collection.storedProcedures
             if ($storedProcedures.Count -gt 0) {
                 Write-Host "Creating stored procedures for collection: $($collectionName), total of $($storedProcedures.Count) stored procedures found."
@@ -340,7 +340,7 @@ $dbSettingsArray | ForEach-Object {
                     $sp = $_
                     $spName = $sp.spName
                     $spSecretName = $sp.SpSecretName
-                    Write-Host "Installing $ResourceType '$spName' to Cosmos DB collection '$($dbName)/$($collectionName)'..."
+                    Write-Host "Installing '$ResourceType' '$spName' to Cosmos DB collection '$($dbName)/$($collectionName)'..."
                     $spDefinition = $(az keyvault secret show --vault-name $VaultName --name $spSecretName | ConvertFrom-Json).value | FromBase64
                     $spJson = @{
                         id   = $SpName
@@ -371,6 +371,53 @@ $dbSettingsArray | ForEach-Object {
                         }
                         if (!$spUpdated) {
                             throw "Failed to update stored procedure $spName"
+                        }
+                    }
+                }
+            }
+        }
+
+        $haveUdfs = [bool]($collection.PSobject.Properties.name -match "udfs")
+        if ($haveUdfs) {
+            $ResourceType = "udfs"
+            [array]$udfs = $collection.udfs
+            if ($udfs.Count -gt 0) {
+                Write-Host "Creating udf for collection: $($collectionName), total of $($udfs.Count) udfs found."
+                $udfs | ForEach-Object {
+                    $udf = $_
+                    $udfName = $udf.udfName
+                    $udfSecretName = $udf.UdfSecretName
+                    Write-Host "Installing '$ResourceType' '$udfName' to Cosmos DB collection '$($dbName)/$($collectionName)'..."
+                    $udfDefinition = $(az keyvault secret show --vault-name $VaultName --name $udfSecretName | ConvertFrom-Json).value | FromBase64
+                    $udfJson = @{
+                        id   = $UdfName
+                        body = $UdfDefinition
+                    } | ConvertTo-Json
+
+                    Write-Host "`n`n$($udfJson)`n`n"
+
+                    $createResult = SubmitCosmosDbApiRequest `
+                        -Verb 'POST' `
+                        -ResourceId "dbs/$dbName/colls/$collectionName" `
+                        -ResourceType $ResourceType `
+                        -Url "https://$AccountName.documents.azure.com/dbs/$dbName/colls/$collectionName/$ResourceType" `
+                        -Key $AuthKey `
+                        -BodyJson $udfJson
+
+                    # If that failed because the object already exists, update the object
+                    if ($createResult -eq 'AlreadyExists') {
+                        Write-Host "$ObjectType already exists. Updating..."
+                        $spUpdated = Retry(3) {
+                            SubmitCosmosDbApiRequest `
+                                -Verb 'PUT' `
+                                -ResourceId "dbs/$dbName/colls/$collectionName/$ResourceType/$udfName" `
+                                -ResourceType $ResourceType `
+                                -Url "https://$AccountName.documents.azure.com/dbs/$dbName/colls/$collectionName/$ResourceType/$udfName" `
+                                -Key $AuthKey `
+                                -BodyJson $udfJson | Out-Null
+                        }
+                        if (!$spUpdated) {
+                            throw "Failed to update udf $udfName"
                         }
                     }
                 }
