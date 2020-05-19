@@ -1,5 +1,5 @@
 resource "null_resource" "cosmosdb_account" {
-  count = "${var.cosmos_db_account != "" && var.resource_group_name != "" ? 1 : 0}"
+  count = var.cosmos_db_account != "" && var.resource_group_name != "" ? 1 : 0
 
   provisioner "local-exec" {
     command = "${path.module}/ensure_cosmosdb_account.sh -a ${var.cosmos_db_account} -s \"${var.cosmosdb_subscription_id}\" -r ${var.resource_group_name} -c ${var.consistency_level} -l ${var.location}"
@@ -14,10 +14,10 @@ resource "null_resource" "cosmosdb_account" {
 }
 
 resource "null_resource" "create_cosmosdb_sql_collections" {
-  count = "${var.cosmos_db_settings != "" ? 1 : 0}"
+  count = var.cosmos_db_settings != "" ? 1 : 0
 
   provisioner "local-exec" {
-    command = "echo "${var.cosmos_db_settings}" >> ${path.module}/cosmos_db_settings && pwsh ${path.module}/ensure_db_collections.ps1 -AccountName ${var.cosmos_db_account} -SubscriptionId \"${var.cosmosdb_subscription_id}\" -ResourceGroupName ${var.resource_group_name} -DbCollectionSettingsFile \"${path.module}/cosmos_db_settings\""
+    command = "echo ${var.cosmos_db_settings} >> ${path.module}/cosmos_db_settings && pwsh ${path.module}/ensure_db_collections.ps1 -AccountName ${var.cosmos_db_account} -SubscriptionId \"${var.cosmosdb_subscription_id}\" -ResourceGroupName ${var.resource_group_name} -DbCollectionSettingsFile \"${path.module}/cosmos_db_settings\""
   }
 
   triggers = {
@@ -26,11 +26,11 @@ resource "null_resource" "create_cosmosdb_sql_collections" {
     cosmos_db_settings       = "${var.cosmos_db_settings}"
   }
 
-  depends_on = ["null_resource.cosmosdb_account"]
+  depends_on = [null_resource.cosmosdb_account]
 }
 
 resource "null_resource" "store_auth_key" {
-  count = "${var.cosmos_db_account != "" && var.resource_group_name != "" && var.vault_name != "" ? 1 : 0}"
+  count = var.cosmos_db_account != "" && var.resource_group_name != "" && var.vault_name != "" ? 1 : 0
 
   provisioner "local-exec" {
     command = "${path.module}/store_authkey.sh -a ${var.cosmos_db_account} -s \"${var.cosmosdb_subscription_id}\" -r ${var.resource_group_name} -v \"${var.vault_name}\" -t \"${var.vault_subscription_id}\""
@@ -44,11 +44,11 @@ resource "null_resource" "store_auth_key" {
     vault_subscription_id    = "${var.vault_subscription_id}"
   }
 
-  depends_on = ["null_resource.cosmosdb_account"]
+  depends_on = [null_resource.cosmosdb_account]
 }
 
 resource "null_resource" "backup_auth_key" {
-  count = "${var.cosmos_db_account != "" && var.resource_group_name != "" && var.master_vault_name != "" ? 1 : 0}"
+  count = var.cosmos_db_account != "" && var.resource_group_name != "" && var.master_vault_name != "" ? 1 : 0
 
   provisioner "local-exec" {
     command = "${path.module}/store_authkey.sh -a ${var.cosmos_db_account} -s \"${var.cosmosdb_subscription_id}\" -r ${var.resource_group_name} -v \"${var.master_vault_name}\" -t \"${var.master_vault_subscription_id}\""
@@ -62,5 +62,5 @@ resource "null_resource" "backup_auth_key" {
     master_vault_subscription_id = "${var.master_vault_subscription_id}"
   }
 
-  depends_on = ["null_resource.cosmosdb_account"]
+  depends_on = [null_resource.cosmosdb_account]
 }
