@@ -1,7 +1,7 @@
 param(
     [string]$AccountName,
     [string]$SubscriptionId,
-    [string]$DbSettings,
+    [string]$DbSettingsFile,
     [string]$VaultName
 )
 
@@ -310,6 +310,10 @@ if ($null -ne $SubscriptionId -and $SubscriptionId -ne "") {
     az account set -s $SubscriptionId
 }
 
+if (-not (Test-Path $DbSettingsFile)) {
+    throw "Unable to find collection setting file: $DbSettingsFile"
+}
+$DbSettings = Get-Content $DbSettingsFile -Raw
 $json = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($DbSettings))
 Write-Host "db setting as json: $json"
 

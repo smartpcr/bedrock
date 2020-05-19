@@ -17,7 +17,7 @@ resource "null_resource" "create_cosmosdb_sql_collections" {
   count = "${var.cosmos_db_settings != "" ? 1 : 0}"
 
   provisioner "local-exec" {
-    command = "pwsh ${path.module}/ensure_db_collections.ps1 -AccountName ${var.cosmos_db_account} -SubscriptionId \"${var.cosmosdb_subscription_id}\" -ResourceGroupName ${var.resource_group_name} -DbCollectionSettings \"${var.cosmos_db_settings}\""
+    command = "echo "${var.cosmos_db_settings}" >> ${path.module}/cosmos_db_settings && pwsh ${path.module}/ensure_db_collections.ps1 -AccountName ${var.cosmos_db_account} -SubscriptionId \"${var.cosmosdb_subscription_id}\" -ResourceGroupName ${var.resource_group_name} -DbCollectionSettingsFile \"${path.module}/cosmos_db_settings\""
   }
 
   triggers = {

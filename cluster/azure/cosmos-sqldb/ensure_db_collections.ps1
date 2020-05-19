@@ -2,9 +2,14 @@ param(
     [string]$AccountName,
     [string]$SubscriptionId,
     [string]$ResourceGroupName,
-    [string]$DbCollectionSettings
+    [string]$DbCollectionSettingsFile
 )
 
+if (-not (Test-Path $DbCollectionSettingsFile)) {
+    throw "Unable to find collection setting file: $DbCollectionSettingsFile"
+}
+
+$DbCollectionSettings = Get-Content $DbCollectionSettingsFile -Raw
 $json = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($DbCollectionSettings))
 Write-Host "db setting as json: $json"
 
