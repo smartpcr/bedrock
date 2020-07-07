@@ -1,12 +1,12 @@
 # URL to get flux which will be installed in the Kubernetes cluster
 variable "flux_repo_url" {
-  type    = "string"
+  type    = string
   default = "https://github.com/weaveworks/flux.git"
 }
 
 # container registry to download flux image
 variable "flux_image_repository" {
-  type    = "string"
+  type    = string
   default = "docker.io/weaveworks/flux"
 }
 
@@ -17,32 +17,32 @@ variable "flux_image_tag" {
 }
 
 variable "gitops_path" {
-  type = "string"
+  type    = string
 }
 
 variable "gitops_poll_interval" {
-  type    = "string"
+  type    = string
   default = "5m"
 }
 
 variable "gitops_ssh_url" {
   description = "ssh git clone repository URL with Kubernetes manifests including services which runs in the cluster. Flux monitors this repo for Kubernetes manifest additions/changes preriodiaclly and apply them in the cluster."
-  type        = "string"
+  type        = string
 }
 
 variable "gitops_url_branch" {
   description = "Git branch associated with the gitops_ssh_url where flux checks for the raw kubernetes yaml files to deploy to the cluster."
-  type        = "string"
+  type        = string
   default     = "master"
 }
 
 variable "acr_enabled" {
-  type    = "string"
+  type    = string
   default = "false"
 }
 
 variable "gc_enabled" {
-  type    = "string"
+  type    = string
   default = "true"
 }
 
@@ -52,64 +52,64 @@ variable "gc_enabled" {
 # assign/specify private key to "gitops_ssh_key" variable that will be used to cretae kubernetes secret object
 # flux use this key to read manifests in the git repo
 variable "gitops_ssh_key" {
-  type = "string"
+  type    = string
 }
 
 variable "output_directory" {
-  type    = "string"
+  type    = string
   default = "./output"
 }
 
 variable "enable_flux" {
-  type    = "string"
+  type    = string
   default = "true"
 }
 
 variable "kubeconfig_filename" {
   description = "Name of the kube config file saved to disk."
-  type        = "string"
+  type        = string
   default     = "bedrock_kube_config"
 }
 
 variable "kubeconfigadmin_filename" {
   description = "Name of the admin kube config file saved to disk."
-  type        = "string"
+  type        = string
   default     = "admin_kube_config"
 }
 
 variable "flux_recreate" {
   description = "Make any change to this value to trigger the recreation of the flux execution script."
-  type        = "string"
+  type        = string
   default     = ""
 }
 
 variable "kubeconfig_complete" {
   description = "Allows flux to wait for the kubeconfig completion write to disk. Workaround for the fact that modules themselves cannot have dependencies."
-  type        = "string"
+  type        = string
 }
 
 variable "kubeconfigadmin_done" {
   description = "Allows flux to wait for the admin kubeconfig completion write to disk. Workaround for the fact that modules themselves cannot have dependencies."
-  type        = "string"
+  type        = string
 }
 
 variable "flux_clone_dir" {
   description = "Name of the directory to clone flux repo and deploy in the cluster."
-  type        = "string"
+  type        = string
 }
 
 variable "create_helm_operator" {
-  type = "string"
+  type    = string
   description = "create helm operator"
 }
 
 variable "create_helm_operator_crds" {
-  type = "string"
+  type    = string
   description = "create CRDs associated with helm operator"
 }
 
 variable "git_label" {
-  type = "string"
+  type    = string
   description = "comma-separated list of labels to be applied to git commit (in addition to flux-sync)"
   default = ""
 }
