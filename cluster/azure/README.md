@@ -32,9 +32,10 @@ The following templates are currently available for deployment:
 - [azure-single-keyvault](../environments/azure-single-keyvault): Single cluster with Azure Keyvault integration through flex volumes template.
 - [azure-multiple-clusters](../environments/azure-multiple-clusters/): Multiple cluster deployment with Traffic Manager.
 
+### Deploying Azure Cluster
 The common steps necessary to deploy a cluster are:
 
-- [Build Fabrikate Definition for Container Deployment](../../docs/fabrikate/README.md) 
+- [Build Fabrikate Definition for Container Deployment](../../docs/fabrikate/README.md)
 - [Create an Azure service principal](#create-an-azure-service-principal)
 - [Configure Terraform CLI to use the Azure Service Principal](#configure-terraform-cli-for-azure)
 - [Create Terraform configuration files](#create-terraform-configuration-files)
@@ -57,7 +58,7 @@ Within each environment, the required resource groups that need to be created ar
 You can generate an Azure Service Principal using the [`az ad sp create-for-rbac`](https://docs.microsoft.com/en-us/cli/azure/ad/sp?view=azure-cli-latest#az-ad-sp-create) command with `--skip-assignment` option. The `--skip-assignment` parameter limits any additional permissions from being assigned the default [`Contributor`](https://docs.microsoft.com/en-us/azure/role-based-access-control/rbac-and-directory-admin-roles#azure-rbac-roles) role in Azure subscription.
 
 ```bash
-$ az ad sp create-for-rbac --subscription <id | name>
+$ az ad sp create-for-rbac --role contributor --scopes /subscriptions/<subscription id>/resourceGroups/<resource group>
 ```
 
 The output of the above commands will look something like this:
@@ -75,6 +76,28 @@ The output of the above commands will look something like this:
 Note: You may receive an error if you do not have sufficient permissions on your Azure subscription to create a service principal.  If this happens, contact a subscription administrator to determine whether you have contributor-level access to the subscription.
 
 There are some environments that perform role assignments during the process of deployments.  In this case, the Service Principal requires Owner level access on the subscription.  Each environment where this is the case will document the requirements and whether or not there is a configuration option not requiring the Owner level privileges.
+
+### Assign Service Principal to Azure Container Registry (OPTIONAL)
+
+If you are using an Azure Container Registry (ACR) you will want to make sure the service principal associated with your AKS cluster also has permissions to pull images. Run the following commands to grant a role assignment to your ACR.
+
+```bash
+RESOURCE_GROUP="<NAME OF YOUR RESOURCE GROUP>"
+SERVICE_PRINCIPAL_ID="<APP ID OF SERVICE PRINCIPAL>"
+ACR_NAME="<NAME OF YOUR ACR>"
+# Obtain the full registry ID for subsequent command args
+ACR_REGISTRY_ID=$(az acr show --name $ACR_NAME -g $RESOURCE_GROUP --query id --output tsv)
+
+# Default permissions are for docker pull access. Modify the '--role'
+# argument value as desired:
+# acrpull:     pull only
+# acrpush:     push and pull
+# owner:       push, pull, and assign roles
+DESIRED_ROLE="<CHOOSE ROLE>"
+ROLE_INFO=$(az role assignment create --assignee $SERVICE_PRINCIPAL_ID --scope $ACR_REGISTRY_ID --role $DESIRED_ROLE)
+```
+
+**Note**: If you will be using the same service principal to push images to your ACR in the build process you may want to choose `acr push` or `owner` as desired role.
 
 ### Configure Terraform CLI for Azure
 
@@ -139,11 +162,12 @@ The common variables:
 - `dns_prefix`: DNS name for accessing the cluster from the internet (up to 64 characters in length, alphanumeric characters and hyphen '-' allowed, and must start with a letter).
 - `service_principal_id`: The id of the service principal used by the AKS cluster.  This is generated using the Azure CLI (see [Create an Azure service principal](#create-an-azure-service-principal) for details).
 - `service_principal_secret`: The secret of the service principal used by the AKS cluster.  This is generated using the Azure CLI (see [Create an Azure service principal](#create-an-azure-service-principal) for details).
-- `ssh_public_key`: Contents of a public key authorized to access the virtual machines within the cluster.  Copy the entire string contents of the gitops_repo_key.pub file that was generated in the [Set up GitOps repository for Flux](#set-up-gitops-repository-for-flux) step.
-- `gitops_ssh_url`: The git repo that contains the resource manifests that should be deployed in the cluster in ssh format (eg. `git@github.com:timfpark/fabrikate-cloud-native-manifests.git`). This repo must have a deployment key configured to accept changes from `GitOps_ssh_key` (see [Set up GitOps repository for Flux](#set-up-gitops-repository-for-flux) for more details).
-- `gitops_ssh_key`: Absolute path to the *private key file* (i.e. gitops_repo_key) that was generated in the [Set up GitOps repository for Flux](#set-up-gitops-repository-for-flux) step and configured to work with the GitOps repository.
+- `ssh_public_key`: Contents of a public key authorized to access the virtual machines within the cluster.  Copy the entire string contents of the gitops_repo_key.pub file that was generated in the [Set up GitOps repository for Flux](../common/flux/) step.
+- `gitops_ssh_url`: The git repo that contains the resource manifests that should be deployed in the cluster in ssh format (eg. `git@github.com:timfpark/fabrikate-cloud-native-manifests.git`). This repo must have a deployment key configured to accept changes from `gitops_ssh_key_path` (see [Set up GitOps repository for Flux](../common/flux/) for more details).
+- `gitops_ssh_key_path`: Absolute path to the *private key file* (i.e. gitops_repo_key) that was generated in the [Set up GitOps repository for Flux](../common/flux/) step and configured to work with the GitOps repository.
 - `gitops_path`: Path to a subdirectory, or folder in a git repo
 - `oms_agent_enabled`: Boolean variable that will provision OMS Linux agents to onboard Azure Monitor for containers. NOTE: `oms_agent_enabled` is set to false by default, but Azure Log Analytics resources (e.g. solutions, workspaces) will still be created, but not used.
+- `vnet_name`: Name to a virtual network resource.
 
 The full list of variables that are customizable are in the `variables.tf` file within each environment template.
 
@@ -158,12 +182,53 @@ From the directory of the cluster you defined above (eg. `environments/azure/<yo
 $ terraform init
 ```
 
-This will download all of the modules needed for the deployment.  You can then deploy the cluster with:
+This will download all of the modules needed for the deployment.
+
+#### Importing existing resources
+If you need to create the cluster within an existing resource group and Vnet/Subnet combo because for example this subnet is connected to your on premise network using VPN then you need to import these existing resources.
+
+First add the required existing resources in ``main.tf`` in ``cluster/environments/<your new cluster name>/``
+
+An example block might look like
+```
+resource "azurerm_resource_group" "existing_rg" {
+ name = "My-Resource-Group"
+ location = "${var.resource_group_location}"
+ }
+
+resource "azurerm_virtual_network" "existing_vnet" {
+  name = "VNET"
+  address_space = ["subnet address 1", "subnet address 1"]
+  location = "${var.resource_group_location}"
+  resource_group_name = "${azurerm_resource_group.existing_rg.name}"
+  dns_servers = ["dns1", "dns2"]
+}
+
+resource "azurerm_subnet" "existing_subnet" {
+ name = "subnet1"
+ resource_group_name = "${azurerm_resource_group.existing_vnet.name}"
+ virtual_network_name = "${azurerm_virtual_network.existing_vnet.name}"
+ address_prefix = "subnet address 1"
+}
+```
+Then you can use ``terraform import`` so that terraform knows about these resources and can maintain references to these in terraform state.
+
+An example run might look like
+
+```
+terraform import azurerm_resource_group.existing_rg "/subscriptions/<<subscription_id>>/resourceGroups/My-Resource-Group"
+
+terraform import azurerm_virtual_network.existing_vnet /subscriptions/<<subscription_id>>/resourceGroups/My-Resource-Group/providers/Microsoft.Network/virtualNetworks/VNET
+
+terraform import azurerm_subnet.existing_subnet /subscriptions/<<subscription_id>>/resourceGroups/My-Resource-Group/providers/Microsoft.Network/virtualNetworks/VNET/subnets/subnet1
+```
+Be sure to replace the <<subscription_id>> with your own subscription id above.
+
+You can then deploy the cluster with:
 
 ```
 $ terraform apply
 ```
-
 This will display the plan for what infrastructure Terraform plans to deploy into your subscription and ask for your confirmation.
 
 Once you have confirmed the plan, Terraform will deploy the cluster, install [Flux](https://github.com/weaveworks/flux) in the cluster to kick off a [GitOps](https://www.weave.works/blog/GitOps-operations-by-pull-request) operator, and deploy any resource manifests in the `gitops_ssh_url`.
@@ -178,7 +243,7 @@ In production scenarios, storing the state file on a local file system is not de
 
 ```bash
 terraform {
-   backend “azure” {
+   backend "azurerm" {
    }
 }
 ```
@@ -216,6 +281,8 @@ It is also possible to use the config that was generated directly.  For instance
 ```
 $ KUBECONFIG=./output/bedrock_kube_config kubectl get po --namespace=flux`
 ```
+
+__Note:__ To recreate/redownload credentials file from the cluster, simply delete the `bedrock_kube_config` file in the location specified by the variable `output_directory` and rerun `terraform apply`.
 
 ### Verify that your AKS cluster is healthy
 

@@ -6,7 +6,7 @@ keyvault_name = "my-keyvault"
 keyvault_resource_group = "my-global-rg"
 
 address_space = "<cidr for cluster address space>"
-subnet_prefixes = "10.39.0.0/16"
+subnet_address_prefix = "10.39.0.0/16"
 vnet_name = "<vnet name>"
 subnet_name = "<subnet_name>"
 
@@ -29,7 +29,7 @@ cluster_name = "azure-single-keyvault"
 dns_prefix = "azure-single-keyvault"
 
 gitops_ssh_url = "git@github.com:Microsoft/fabrikate-production-cluster-demo-materialized"
-gitops_ssh_key = "./gitops_repo_key"
+gitops_ssh_key_path = "./gitops_repo_key"
 
 resource_group_name = "azure-single-keyvault-rg"
 

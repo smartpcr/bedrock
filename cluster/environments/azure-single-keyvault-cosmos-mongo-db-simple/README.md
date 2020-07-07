@@ -9,7 +9,7 @@ The Azure Single Cluster environment requires the creation of a single resource 
 ## Getting Started
 
 1. Copy this template directory to a repo of its own. Bedrock environments remotely reference the Terraform modules that they need and do not need be housed in the Bedrock repo.
-2. Follow the instructions on the [main Azure page](../../azure) in this repo to create your cluster and surrounding infrastructure. This environment is dependant on a deployment on [azure-common-infra](../azure-common-infra), so configure and deploy azure-common-ifra prior to deploying `azure-single-keyvault-cosmos-mongo-db-simple`.
+2. Follow the instructions on the [main Azure page](../../azure#Deploying-Azure-Cluster) in this repo to create your cluster and surrounding infrastructure. This environment is dependant on a deployment on [azure-common-infra](../azure-common-infra), so configure and deploy azure-common-ifra prior to deploying `azure-single-keyvault-cosmos-mongo-db-simple`.
 
 ## Deploy the Environment
 
@@ -61,7 +61,7 @@ cluster_name = "azure-single-keyvault-cosmos-mongo-db-simple"
 dns_prefix = "azure-single-keyvault-cosmos-mongo-db-simple"
 
 gitops_ssh_url = "git@github.com:Microsoft/fabrikate-production-cluster-demo-materialized"
-gitops_ssh_key = "./gitops_repo_key"
+gitops_ssh_key_path = "./gitops_repo_key"
 
 resource_group_name = "azure-single-keyvault-cosmos-mongo-db-simple-rg"
 resource_group_location = "westus2"
@@ -77,6 +77,7 @@ service_principal_secret = "<service principal secret>"
 # gitops_url_branch = "release-123"
 # gitops_poll_interval = "30s"
 # gitops_path = "prod"
+# gitops_label = "custom-flux-sync"
 
 ```
 
@@ -89,7 +90,7 @@ terraform apply -var-file=./terraform.tfvars
 
 ## Configure kubectl to see your new AKS cluster
 
-Upon deployment of the cluster, one artifact that the terraform scripts generate is the credentials necessary for logging into the AKS cluster that was deployed. These credentials are placed in the location specified by the variable “output_directory”. For single cluster environments, this defaults to .”/output”.
+Upon deployment of the cluster, one artifact that the terraform scripts generate is the credentials necessary for logging into the AKS cluster that was deployed. These credentials are placed in the location specified by the variable "output_directory". For single cluster environments, this defaults to .”/output”.
 
 With the default kube config file name, you can copy this to your ~/.kube/config by executing:
 

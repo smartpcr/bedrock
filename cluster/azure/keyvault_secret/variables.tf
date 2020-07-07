@@ -1,13 +1,19 @@
 variable "vault_uri" {
-  type = "string"
+  type = string
 }
 
 variable "secret_name" {
-  type    = "string"
+  type    = string
   default = ""
 }
 
 variable "secret_value" {
-  type    = "string"
+  type    = string
   default = ""
+}
+
+variable "tags" {
+  description = "The tags to associate with the secret"
+  type        = map
+  default = {}
 }

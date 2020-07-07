@@ -12,8 +12,8 @@ variable "flux_image_repository" {
 
 # flux version to download source from git repo and container image from the registry
 variable "flux_image_tag" {
-  type    = "string"
-  default = "1.12.2"
+  type    = string
+  default = "1.18.0"
 }
 
 variable "gitops_path" {

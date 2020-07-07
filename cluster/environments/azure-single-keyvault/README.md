@@ -5,7 +5,7 @@ The `azure-single-keyvault` environment deploys a single production level AKS cl
 ## Getting Started
 
 1. Copy this template directory to a repo of its own. Bedrock environments remotely reference the Terraform modules that they need and do not need be housed in the Bedrock repo.
-2. Follow the instructions on the [main Azure page](../../azure) in this repo to create your cluster and surrounding infrastructure.
+2. Follow the instructions on the [main Azure page](../../azure#Deploying-Azure-Cluster) in this repo to create your cluster and surrounding infrastructure.
 
 ## Resource Group Requirement
 
@@ -24,7 +24,8 @@ access_key="<storage account access key>"
 
 container_name="myContainer"
 
-key="tfstate-single-keyvault"
+key="tfstate-azure-single-keyvault"
+
 ```
 
 If there is not a `terraform.tfvars`, create one that looks like this:
@@ -36,17 +37,14 @@ If there is not a `terraform.tfvars`, create one that looks like this:
 
 #--------------------------------------------------------------
 
-vault_name = "myVault"
+keyvault_name = "myVault"
+keyvault_resource_group = "<existing keyvault rg>"
 
-keyvault_resource_group = "myResourceGroup"
+keyvault_name = "<keyvault created in azure-common-infra template>"
 
-address_space = "10.39.0.0/16"
+vnet_name = "<vnet-name created in azure-common-infra template>"
 
-subnet_prefixes = "10.39.0.0/24"
-
-vnet_name = "myVnet"
-
-vnet_subnet_id = "/subscriptions/<subscriptionId>/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/myVnet/subnets/mySubnet"
+subnet_name = "<subnet-name created in azure-common-infra template>"
 
 #--------------------------------------------------------------
 
@@ -64,9 +62,9 @@ dns_prefix = "my-single-keyvault"
 
 gitops_ssh_url = "git@github.com:yradsmikham/fabrikate-production-cluster-demo-materialized"
 
-gitops_ssh_key = "/full/path/to/gitops_repo_private_key"
+gitops_ssh_key_path = "/full/path/to/gitops_repo_private_key"
 
-# you can create a new deploy key (e.g. ssh-keygen) to use as your gitops_ssh_key
+# you can create a new deploy key (e.g. ssh-keygen) to use as your gitops_ssh_key_path
 
 resource_group_name = "my-single-keyvault-rg"
 
@@ -91,6 +89,8 @@ tenant_id = "<tenantId>"
 # gitops_poll_interval = "30s"
 
 # gitops_path = "prod"
+
+# gitops_label = "custom-flux-sync"
 ```
 
 To deploy the azure-single-keyvault environment, run the following commands in your environment directory:
@@ -102,7 +102,7 @@ terraform apply -var-file=./terraform.tfvars
 
 ## Configure kubectl to see your new AKS cluster
 
-Upon deployment of the cluster, one artifact that the terraform scripts generate is the credentials necessary for logging into the AKS cluster that was deployed. These credentials are placed in the location specified by the variable “output_directory”. For single cluster environments, this defaults to .”/output”.
+Upon deployment of the cluster, one artifact that the terraform scripts generate is the credentials necessary for logging into the AKS cluster that was deployed. These credentials are placed in the location specified by the variable "output_directory". For single cluster environments, this defaults to .”/output”.
 
 With the default kube config file name, you can copy this to your ~/.kube/config by executing:
 

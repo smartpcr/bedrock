@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -28,6 +29,7 @@ func TestIT_Bedrock_AzureSimple_Test(t *testing.T) {
 	tenantId := os.Getenv("ARM_TENANT_ID")
 	dnsprefix := k8sName + "-dns"
 	k8sRG := k8sName + "-rg"
+	k8sVersion := "1.15.11"
 	location := os.Getenv("DATACENTER_LOCATION")
 	publickey := os.Getenv("public_key")
 	sshkey := os.Getenv("ssh_key")
@@ -36,6 +38,36 @@ func TestIT_Bedrock_AzureSimple_Test(t *testing.T) {
 	//Copy env directories as needed to avoid conflicting with other running tests
 	azureSimpleInfraFolder := "../cluster/test-temp-envs/azure-simple-" + k8sName
 	copy.Copy("../cluster/environments/azure-simple", azureSimpleInfraFolder)
+
+	// Remove any existing state 
+	tfDir := azureSimpleInfraFolder + "/.terraform"
+	if _, err := os.Stat(tfDir); !os.IsNotExist(err) {
+		os.RemoveAll(tfDir)
+	}
+	stateFileGlob := azureSimpleInfraFolder + "/*tfstate*"
+	stateFiles, err := filepath.Glob(stateFileGlob)
+	if err != nil {
+		panic(err)
+	}
+	for _, f := range stateFiles {
+		if err := os.Remove(f); err != nil {
+			panic(err)
+		}
+	}
+	outputDir := azureSimpleInfraFolder + "/output"
+	if _, err := os.Stat(outputDir); !os.IsNotExist(err) {
+		os.RemoveAll(outputDir)
+	}
+	fluxDirGlob := azureSimpleInfraFolder + "/*-flux"
+	fluxDirs, err := filepath.Glob(fluxDirGlob)
+	if err != nil {
+		panic(err)
+	}
+	for _, d := range fluxDirs {
+		if err := os.RemoveAll(d); err != nil {
+			panic(err)
+		}
+	}
 
 	//Create the resource group
 	cmd0 := exec.Command("az", "login", "--service-principal", "-u", clientid, "-p", clientsecret, "--tenant", tenantId)
@@ -62,7 +94,8 @@ func TestIT_Bedrock_AzureSimple_Test(t *testing.T) {
 			"cluster_name":             k8sName,
 			"dns_prefix":               dnsprefix,
 			"gitops_ssh_url":           "git@github.com:timfpark/fabrikate-cloud-native-manifests.git",
-			"gitops_ssh_key":           sshkey,
+			"gitops_ssh_key_path":      sshkey,
+			"kubernetes_version":       k8sVersion,
 			"resource_group_name":      k8sRG,
 			"service_principal_id":     clientid,
 			"service_principal_secret": clientsecret,

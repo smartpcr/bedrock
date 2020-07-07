@@ -2,6 +2,7 @@ package test
 
 import (
 	"fmt"
+
 	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/terraform"
@@ -10,6 +11,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -23,10 +25,11 @@ func TestIT_Bedrock_Azure_Single_KV_Cosmos_Mongo_DB_Test(t *testing.T) {
 	addressSpace := "10.39.0.0/16"
 	kvName := k8sName + "-kv"
 	kvRG := kvName + "-rg"
+	k8sVersion := "1.15.11"
 	location := os.Getenv("DATACENTER_LOCATION")
 	tenantid := os.Getenv("ARM_TENANT_ID")
 	clientid := os.Getenv("ARM_CLIENT_ID")
-        clientsecret := os.Getenv("ARM_CLIENT_SECRET")
+	clientsecret := os.Getenv("ARM_CLIENT_SECRET")
 	subnetName := k8sName + "-subnet"
 	vnetName := k8sName + "-vnet"
 
@@ -40,21 +43,51 @@ func TestIT_Bedrock_Azure_Single_KV_Cosmos_Mongo_DB_Test(t *testing.T) {
 	azureCommonInfraFolder := "../cluster/test-temp-envs/azure-common-infra-" + k8sName
 	copy.Copy("../cluster/environments/azure-common-infra", azureCommonInfraFolder)
 
+        // Remove any existing state
+        tfDir := azureCommonInfraFolder + "/.terraform"
+        if _, err := os.Stat(tfDir); !os.IsNotExist(err) {
+                os.RemoveAll(tfDir)
+        }
+        stateFileGlob := azureCommonInfraFolder + "/*tfstate*"
+        stateFiles, err := filepath.Glob(stateFileGlob)
+        if err != nil {
+                panic(err)
+        }
+        for _, f := range stateFiles {
+                if err := os.Remove(f); err != nil {
+                        panic(err)
+                }
+        }
+        outputDir := azureCommonInfraFolder + "/output"
+        if _, err := os.Stat(outputDir); !os.IsNotExist(err) {
+                os.RemoveAll(outputDir)
+        }
+        fluxDirGlob := azureCommonInfraFolder + "/*-flux"
+        fluxDirs, err := filepath.Glob(fluxDirGlob)
+        if err != nil {
+                panic(err)
+        }
+        for _, d := range fluxDirs {
+                if err := os.RemoveAll(d); err != nil {
+                        panic(err)
+                }
+        }
+
 	//Create the resource group
-        cmd0 := exec.Command("az", "login", "--service-principal", "-u", clientid, "-p", clientsecret, "--tenant", tenantid)
-        err0 := cmd0.Run()
-        if err0 != nil {
-                fmt.Println("unable to login to azure cli")
-                log.Fatal(err0)
-                os.Exit(-1)
-        }
-        cmd1 := exec.Command("az", "group", "create", "-n", kvRG, "-l", location)
-        err1 := cmd1.Run()
-        if err1 != nil {
-                fmt.Println("failed to create common resource group")
-                log.Fatal(err1)
-                os.Exit(-1)
-        }
+	cmd0 := exec.Command("az", "login", "--service-principal", "-u", clientid, "-p", clientsecret, "--tenant", tenantid)
+	err0 := cmd0.Run()
+	if err0 != nil {
+		fmt.Println("unable to login to azure cli")
+		log.Fatal(err0)
+		os.Exit(-1)
+	}
+	cmd1 := exec.Command("az", "group", "create", "-n", kvRG, "-l", location)
+	err1 := cmd1.Run()
+	if err1 != nil {
+		fmt.Println("failed to create common resource group")
+		log.Fatal(err1)
+		os.Exit(-1)
+	}
 
 	//Specify the test case folder and "-var" option mapping for the backend
 	common_backend_tfOptions := &terraform.Options{
@@ -72,13 +105,11 @@ func TestIT_Bedrock_Azure_Single_KV_Cosmos_Mongo_DB_Test(t *testing.T) {
 		TerraformDir: azureCommonInfraFolder,
 		Upgrade:      true,
 		Vars: map[string]interface{}{
-			"address_space":                  addressSpace,
-			"vault_name":                  kvName,
-			"global_resource_group_name":     kvRG,
-			"service_principal_id":           clientid,
-			"subnet_name":                    subnetName,
-			"subnet_prefix":                  addressSpace,
-			"vnet_name":                      vnetName,
+			"address_space":              addressSpace,
+			"keyvault_name":              kvName,
+			"global_resource_group_name": kvRG,
+			"service_principal_id":       clientid,
+			"vnet_name":                  vnetName,
 		},
 	}
 
@@ -88,7 +119,7 @@ func TestIT_Bedrock_Azure_Single_KV_Cosmos_Mongo_DB_Test(t *testing.T) {
 	terraform.Apply(t, common_tfOptions)
 
 	// Generate azure single environment using resources generated from common-infra
-        dnsprefix := k8sName + "-dns"
+	dnsprefix := k8sName + "-dns"
 	k8sRG := k8sName + "-rg"
 	publickey := os.Getenv("public_key")
 	sshkey := os.Getenv("ssh_key")
@@ -99,11 +130,41 @@ func TestIT_Bedrock_Azure_Single_KV_Cosmos_Mongo_DB_Test(t *testing.T) {
 	azureSingleKeyvaultFolder := "../cluster/test-temp-envs/azure-single-keyvault-cosmos-mongo-db-simple-" + k8sName
 	copy.Copy("../cluster/environments/azure-single-keyvault-cosmos-mongo-db-simple", azureSingleKeyvaultFolder)
 
+        // Remove any existing state
+        tfDir = azureSingleKeyvaultFolder + "/.terraform"
+        if _, err := os.Stat(tfDir); !os.IsNotExist(err) {
+                os.RemoveAll(tfDir)
+        }
+        stateFileGlob = azureSingleKeyvaultFolder + "/*tfstate*"
+        stateFiles, err = filepath.Glob(stateFileGlob)
+        if err != nil {
+                panic(err)
+        }
+        for _, f := range stateFiles {
+                if err := os.Remove(f); err != nil {
+                        panic(err)
+                }
+        }
+        outputDir = azureSingleKeyvaultFolder + "/output"
+        if _, err := os.Stat(outputDir); !os.IsNotExist(err) {
+                os.RemoveAll(outputDir)
+        }
+        fluxDirGlob = azureSingleKeyvaultFolder + "/*-flux"
+        fluxDirs, err = filepath.Glob(fluxDirGlob)
+        if err != nil {
+                panic(err)
+        }
+        for _, d := range fluxDirs {
+                if err := os.RemoveAll(d); err != nil {
+                        panic(err)
+                }
+        }
+
 	//Create the cluster resource group
 	cmd2 := exec.Command("az", "group", "create", "-n", k8sRG, "-l", location)
 	err2 := cmd2.Run()
 	if err2 != nil {
-                fmt.Println("failed to create cluster resource group")
+		fmt.Println("failed to create cluster resource group")
 		log.Fatal(err2)
 		os.Exit(-1)
 	}
@@ -130,16 +191,16 @@ func TestIT_Bedrock_Azure_Single_KV_Cosmos_Mongo_DB_Test(t *testing.T) {
 			"cluster_name":             k8sName,
 			"dns_prefix":               dnsprefix,
 			"gitops_ssh_url":           "git@github.com:timfpark/fabrikate-cloud-native-manifests.git",
-			"gitops_ssh_key":           sshkey,
-			"vault_name":            kvName,
+			"gitops_ssh_key_path":      sshkey,
+			"keyvault_name":            kvName,
 			"keyvault_resource_group":  kvRG,
+			"kubernetes_version":       k8sVersion,
 			"resource_group_name":      k8sRG,
-			"resource_group_location":  location,
 			"ssh_public_key":           publickey,
 			"service_principal_id":     clientid,
 			"service_principal_secret": clientsecret,
-			"subnet_prefixes":          "10.39.0.0/16",
 			"subnet_name":              subnetName,
+			"subnet_address_prefix":    addressSpace,
 			"vnet_name":                vnetName,
 			"cosmos_db_name":           cosmos_db_name,
 			"mongo_db_name":            mongo_db_name,
