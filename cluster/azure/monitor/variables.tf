@@ -1,47 +1,47 @@
 variable "subscription_id" {
-  type = "string"
+  type = string
   description = "azure subscription id where app insights is created"
 }
 
 variable "resource_group_name" {
-  type = "string"
+  type = string
 }
 
 variable "location" {
-  type = "string"
+  type = string
 }
 
 variable "app_insights_name" {
-  type = "string"
+  type = string
 }
 
 variable "service_name" {
-  type = "string"
+  type = string
 }
 
 
 variable "auto_mitigate" {
-  type = "string"
+  type = string
   default = "true"
 }
 
 variable "sev3_enabled" {
-  type = "string"
+  type = string
   default = "true"
 }
 
 variable "sev2_enabled" {
-  type = "string"
+  type = string
   default = "false"
 }
 
 variable "frequency" {
-  type = "string"
+  type = string
   default = "PT5M"
 }
 
 variable "window_size" {
-  type = "string"
+  type = string
   default = "PT15M"
 }
 
@@ -51,64 +51,64 @@ variable "tags" {
 }
 
 variable "metric_namespace" {
-  type = "string"
+  type = string
 }
 
 variable "unhandled_exception_metric_name" {
-  type = "string"
+  type = string
 }
 
 variable "heartbeat_metric_name" {
-  type = "string"
+  type = string
   default = ""
 }
 
 variable "aggregation" {
-  type = "string"
+  type = string
   default = "Total"
 }
 
 variable "operator" {
-  type = "string"
+  type = string
   default = "GreaterThan"
 }
 
 variable "threshold_sev3" {
-  type = "string"
+  type = string
   default = 5
 }
 
 variable "threshold_sev2" {
-  type = "string"
+  type = string
   default = 50
 }
 
 variable "heartbeat_frequency" {
-  type = "string"
+  type = string
   default = "PT1H"
 }
 
 variable "heartbeat_window_size" {
-  type = "string"
+  type = string
   default = "PT6H"
 }
 
 variable "heartbeat_threshold_sev3" {
-  type = "string"
+  type = string
   default = 5
 }
 
 variable "heartbeat_threshold_sev2" {
-  type = "string"
+  type = string
   default = 0
 }
 
 variable "pingable" {
-  type = "string"
+  type = string
   default = "false"
 }
 
 variable "status_url" {
-  type = "string"
+  type = string
   default = ""
 }

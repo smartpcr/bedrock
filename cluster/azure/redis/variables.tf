@@ -1,52 +1,52 @@
 variable "name" {
-  type = "string"
+  type = string
 }
 
 variable "subscription_id" {
-  type = "string"
+  type = string
   description = "azure subscription id where app insights is created"
 }
 
 variable "resource_group_name" {
-  type = "string"
+  type = string
 }
 
 variable "location" {
-  type = "string"
+  type = string
 }
 
 variable "capacity" {
-  type    = "string"
+  type    = string
   default = 2
 }
 
 variable "family" {
-  type    = "string"
+  type    = string
   default = "C"
 }
 
 variable "sku_name" {
-  type    = "string"
+  type    = string
   default = "Standard"
 }
 
 variable "vault_name" {
-  type = "string"
+  type = string
 }
 
 variable "access_key_secret_name" {
-  type = "string"
+  type = string
 }
 
 variable "access_key_secret_version" {
-  type = "string"
+  type = string
 }
 
 
 variable "hostname_secret_name" {
-  type = "string"
+  type = string
 }
 
 variable "hostname_secret_version" {
-  type = "string"
+  type = string
 }

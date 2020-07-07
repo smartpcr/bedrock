@@ -1,45 +1,45 @@
 variable "subscription_id" {
-  type = "string"
+  type = string
   description = "azure subscription id where app insights is created"
 }
 
 variable "resource_group_name" {
-  type = "string"
+  type = string
 }
 
 variable "location" {
-  type = "string"
+  type = string
 }
 
 variable "app_insights_name" {
-  type = "string"
+  type = string
 }
 
 variable "service_name" {
-  type = "string"
+  type = string
 }
 
 variable "auto_mitigate" {
-  type = "string"
+  type = string
   default = "true"
 }
 
 variable "sev3_enabled" {
-  type = "string"
+  type = string
   default = "true"
 }
 
 variable "sev2_enabled" {
-  type = "string"
+  type = string
   default = "false"
 }
 
 variable "metric_namespace" {
-  type = "string"
+  type = string
 }
 
 variable "metric_name" {
-  type = "string"
+  type = string
 }
 
 variable "tags" {
@@ -48,31 +48,31 @@ variable "tags" {
 }
 
 variable "threshold_sev3" {
-  type = "string"
+  type = string
   default = 10
 }
 
 variable "threshold_sev2" {
-  type = "string"
+  type = string
   default = 50
 }
 
 variable "aggregation" {
-  type = "string"
+  type = string
   default = "Total"
 }
 
 variable "operator" {
-  type = "string"
+  type = string
   default = "GreaterThan"
 }
 
 variable "frequency" {
-  type = "string"
+  type = string
   default = "PT1H"
 }
 
 variable "window_size" {
-  type = "string"
+  type = string
   default = "PT6H"
 }
