@@ -177,11 +177,6 @@ variable "msi_enabled" {
   default = false
 }
 
-variable "enable_virtual_node_addon" {
-  type    = string
-  default = "false"
-}
-
 variable "tags" {
   description = "The tags to associate with AKS"
   type        = map
