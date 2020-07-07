@@ -50,7 +50,6 @@ resource "azurerm_virtual_network" "vnet" {
 }
 
 resource "azurerm_subnet" "subnet" {
-  count                = 1
   name                 = "aks-subnet"
   virtual_network_name = "aks-vnet"
   resource_group_name  = var.aks_resource_group_name
