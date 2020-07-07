@@ -42,7 +42,7 @@ module "vnet" {
   source = "../../../cluster/azure/vnet"
 
   resource_group_name     = var.aks_resource_group_name
-  vnet_name               = "${var.cluster_name}-aks-vnet"
+  vnet_name               = "aks-vnet"
   address_space           = var.address_space
 
   tags = {
@@ -54,7 +54,7 @@ module "subnet" {
   source = "../../../cluster/azure/subnet"
 
   resource_group_name  = var.aks_resource_group_name
-  subnet_name          = ["${var.cluster_name}-aks-subnet"]
+  subnet_name          = ["aks-subnet"]
   vnet_name            = module.vnet.vnet_name
   address_prefix       = [var.subnet_prefix]
 }
