@@ -78,7 +78,6 @@ resource "azurerm_kubernetes_cluster" "cluster" {
     name            = "default"
     node_count      = var.agent_vm_count
     vm_size         = var.agent_vm_size
-    os_type         = "Linux"
     os_disk_size_gb = 30
     vnet_subnet_id  = tostring(element(module.subnet.subnet_ids, 0))
   }
