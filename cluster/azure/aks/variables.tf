@@ -74,7 +74,7 @@ variable "agent_vm_size" {
 
 variable "kubernetes_version" {
   type    = string
-  default = "1.13.11"
+  default = "1.16.9"
 }
 
 variable "admin_user" {
@@ -83,6 +83,10 @@ variable "admin_user" {
 }
 
 variable "ssh_public_key" {
+  type = string
+}
+
+variable "vnet_subnet_id" {
   type = string
 }
 
@@ -166,4 +170,21 @@ variable "enable_dev_spaces" {
 variable "dev_space_name" {
   type = string
   default = "dev"
+}
+
+variable "msi_enabled" {
+  type = bool
+  default = false
+}
+
+variable "enable_virtual_node_addon" {
+  type    = string
+  default = "false"
+}
+
+variable "tags" {
+  description = "The tags to associate with AKS"
+  type        = map
+
+  default = {}
 }

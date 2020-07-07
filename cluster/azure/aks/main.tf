@@ -1,3 +1,7 @@
+locals {
+  msi_identity_type = "SystemAssigned"
+}
+
 module "azure-provider" {
   source = "../provider"
 }
@@ -49,12 +53,21 @@ resource "azurerm_kubernetes_cluster" "cluster" {
     }
   }
 
-  agent_pool_profile {
+  default_node_pool {
     name            = "default"
     count           = "${var.agent_vm_count}"
     vm_size         = "${var.agent_vm_size}"
     os_type         = "Linux"
     os_disk_size_gb = 30
+    vnet_subnet_id  = var.vnet_subnet_id
+  }
+
+  network_profile {
+    network_plugin     = var.network_plugin
+    network_policy     = var.network_policy
+    service_cidr       = var.service_cidr
+    dns_service_ip     = var.dns_ip
+    docker_bridge_cidr = var.docker_cidr
   }
 
   role_based_access_control {
@@ -67,9 +80,15 @@ resource "azurerm_kubernetes_cluster" "cluster" {
     }
   }
 
-  service_principal {
-    client_id     = "${var.service_principal_id}"
-    client_secret = "${var.service_principal_secret}"
+  dynamic "service_principal" {
+    for_each = !var.msi_enabled && var.service_principal_id != "" ? [{
+      client_id     = var.service_principal_id
+      client_secret = var.service_principal_secret
+    }] : []
+    content {
+      client_id     = service_principal.value.client_id
+      client_secret = service_principal.value.client_secret
+    }
   }
 
   addon_profile {
@@ -82,4 +101,26 @@ resource "azurerm_kubernetes_cluster" "cluster" {
       enabled = "${var.enable_http_application_routing}"
     }
   }
+
+  # This dynamic block enables managed service identity for the cluster
+  # in the case that the following holds true:
+  #   1: the msi_enabled input variable is set to true
+  dynamic "identity" {
+    for_each = var.msi_enabled ? [local.msi_identity_type] : []
+    content {
+      type = identity.value
+    }
+  }
+
+  tags = var.tags
+}
+
+data "external" "msi_object_id" {
+  depends_on = [azurerm_kubernetes_cluster.cluster]
+  program = [
+    "${path.module}/aks_msi_client_id_query.sh",
+    var.cluster_name,
+    var.cluster_name,
+    var.subscription_id
+  ]
 }

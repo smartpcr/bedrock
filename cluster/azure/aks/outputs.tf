@@ -42,5 +42,5 @@ output "kubelet_resource_id" {
 }
 
 output "kubeconfigadmin_done" {
-  value = "${join("",null_resource.cluster_credentials_admin.*.id)}"
+  value = ${join("", local_file.cluster_credentials_admin.*.id)}
 }
