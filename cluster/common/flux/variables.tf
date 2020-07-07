@@ -1,13 +1,13 @@
 # URL to get flux which will be installed in the Kubernetes cluster
 variable "flux_repo_url" {
   type    = string
-  default = "https://github.com/weaveworks/flux.git"
+  default = "https://github.com/fluxcd/flux.git"
 }
 
 # container registry to download flux image
 variable "flux_image_repository" {
   type    = string
-  default = "docker.io/weaveworks/flux"
+  default = "docker.io/fluxcd/flux"
 }
 
 # flux version to download source from git repo and container image from the registry
@@ -38,7 +38,7 @@ variable "gitops_url_branch" {
 
 variable "acr_enabled" {
   type    = string
-  default = "false"
+  default = "true"
 }
 
 variable "gc_enabled" {
@@ -96,16 +96,6 @@ variable "kubeconfigadmin_done" {
 variable "flux_clone_dir" {
   description = "Name of the directory to clone flux repo and deploy in the cluster."
   type        = string
-}
-
-variable "create_helm_operator" {
-  type    = string
-  description = "create helm operator"
-}
-
-variable "create_helm_operator_crds" {
-  type    = string
-  description = "create CRDs associated with helm operator"
 }
 
 variable "git_label" {

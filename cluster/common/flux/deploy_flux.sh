@@ -1,4 +1,56 @@
 #!/bin/sh
+#set -x
+# create a temporary directory that is cleaned up after exection
+TMP_DIR=$(mktemp -d -t flux.XXXXXXXXXX) || { echo "Failed to create temp directory"; exit 1; }
+function finish {
+  rm -rf "$TMP_DIR"
+}
+trap finish EXIT
+cd $TMP_DIR
+
+# are we running on macOs
+IS_MACOS=0
+HELM_ARCH="linux-amd64"
+uname -a | grep Darwin > /dev/null
+if [ "$?" -eq "0" ]; then
+  IS_MACOS=1
+  HELM_ARCH="darwin-amd64"
+fi
+
+fetch_helm () {
+  # grab helm.
+  # set HELM_TAG to a specific version, if needed
+  HELM_TAG="v3.1.2"
+  if [ -z "$HELM_TAG" ]; then
+    if [ "$IS_MACOS" -eq "1" ]; then
+      # use sed compatible with MacOS
+      HELM_TAG=$(curl -s https://github.com/helm/helm/releases/latest | sed -E 's/.*tag\/(v[1-9\.]+)\".*/\1/')
+    else
+      HELM_TAG=`curl -s https://github.com/helm/helm/releases/latest | sed -r 's/.*tag\/(v[1-9\.]+)\".*/\1/'`
+    fi
+    if [ "$?" -ne "0" ]; then
+      echo "Failed to retrieve helm version"
+      exit 1
+    fi
+  fi
+
+  # fetch helm
+  curl -L -s --output helm.tgz https://get.helm.sh/helm-$HELM_TAG-$HELM_ARCH.tar.gz
+  if [ "$?" -ne "0" ]; then
+    echo "unable to retrieve helm"
+    exit 1
+  fi
+
+  # expand helm
+  tar -xf helm.tgz
+  if [ "$?" -ne "0" ]; then
+    echo "unable to extract helm"
+    exit 1
+  fi
+
+  cd -
+}
+
 while getopts :b:f:g:k:d:e:c:s:r:t:z:h:i:l: option
 do
  case "${option}" in
@@ -28,6 +80,9 @@ CLONE_DIR="flux"
 REPO_DIR="$REPO_ROOT_DIR/$CLONE_DIR"
 FLUX_CHART_DIR="chart/flux"
 FLUX_MANIFESTS="manifests"
+
+# fetch helm
+fetch_helm
 
 echo "flux repo root directory: $REPO_ROOT_DIR"
 
@@ -60,10 +115,11 @@ fi
 #   release name: flux
 #   git url: where flux monitors for manifests
 #   git ssh secret: kubernetes secret object for flux to read/write access to manifests repo
+HELM_BIN="$TMP_DIR/$HELM_ARCH/helm"
 echo "generating flux manifests with helm template"
-if ! helm template . --name "$RELEASE_NAME" \
-    --namespace "$KUBE_NAMESPACE" \
+if ! $HELM_BIN template $RELEASE_NAME . \
     --values values.yaml \
+    --namespace "$KUBE_NAMESPACE" \
     --set image.repository="$FLUX_IMAGE_REPOSITORY" \
     --set image.tag="$FLUX_IMAGE_TAG" \
     --output-dir "./$FLUX_MANIFESTS" \
@@ -72,49 +128,19 @@ if ! helm template . --name "$RELEASE_NAME" \
     --set git.secretName="$KUBE_SECRET_NAME" \
     --set git.path="$GITOPS_PATH" \
     --set git.pollInterval="$GITOPS_POLL_INTERVAL" \
+    --set git.label="$GIT_LABEL" \
     --set registry.acr.enabled="$ACR_ENABLED" \
     --set syncGarbageCollection.enabled="$GC_ENABLED" \
     --set helmOperator.create="$CREATE_HELM_OPERATOR" \
     --set helmOperator.createCRD="CREATE_CRDS" \
     --set git.setAuthor="true" \
-    --set git.label="$GIT_LABEL"; then
+    --set serviceAccount.name="flux"; then
     echo "ERROR: failed to helm template"
     exit 1
 fi
 
-echo "TODO: install crd in separate command?"
-
 # back to the root dir
 cd ../../../../ || exit 1
-
-
-echo "Creating helm and tiller in kube-system"
-if ! kubectl describe sa tiller -n kube-system > /dev/null 2>&1; then
-    if ! kubectl -n kube-system create sa tiller; then
-        echo "ERROR: failed to create service account tiller in namespace kube-system"
-        exit 1
-    fi
-fi
-
-echo "Creating clusterrolebinding for tiller"
-if ! kubectl describe clusterrolebinding tiller-cluster-role > /dev/null 2>&1; then
-    if ! kubectl create clusterrolebinding tiller-cluster-role --clusterrole=cluster-admin --serviceaccount=kube-system:tiller; then
-        echo "ERROR: failed to create custerrolebinding for tiller"
-        exit 1
-    fi
-fi
-
-echo "Init helm with sa=tiller"
-helm init --skip-refresh --upgrade --service-account tiller
-
-
-echo "clear CRDs (helm doesn't handle crd lifecycle)..."
-if kubectl describe crd fluxhelmreleases.helm.integrations.flux.weave.works > /dev/null 2>&1; then
-    kubectl delete crd fluxhelmreleases.helm.integrations.flux.weave.works
-fi
-if kubectl describe crd helmreleases.flux.weave.works > /dev/null 2>&1; then
-    kubectl delete crd helmreleases.flux.weave.works
-fi
 
 echo "creating kubernetes namespace $KUBE_NAMESPACE if needed"
 if ! kubectl describe namespace $KUBE_NAMESPACE > /dev/null 2>&1; then
