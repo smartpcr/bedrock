@@ -38,25 +38,25 @@ resource "azurerm_log_analytics_solution" "solution" {
   }
 }
 
-module "vnet" {
-  source = "../../../cluster/azure/vnet"
-
-  resource_group_name     = var.aks_resource_group_name
-  vnet_name               = "aks-vnet"
-  address_space           = var.address_space
-
+resource "azurerm_virtual_network" "vnet" {
+  name                = "aks-vnet"
+  location            = var.aks_resource_group_location
+  address_space       = [var.address_space]
+  resource_group_name = var.aks_resource_group_name
+  dns_servers         = []
   tags = {
     environment = "aks-vnet"
   }
 }
 
-module "subnet" {
-  source = "../../../cluster/azure/subnet"
-
+resource "azurerm_subnet" "subnet" {
+  count                = 1
+  name                 = "aks-subnet"
+  virtual_network_name = "aks-vnet"
   resource_group_name  = var.aks_resource_group_name
-  subnet_name          = ["aks-subnet"]
-  vnet_name            = module.vnet.vnet_name
-  address_prefix       = [var.subnet_prefix]
+  address_prefix       = var.subnet_prefix
+  service_endpoints    = []
+  depends_on           = [azurerm_virtual_network.subnet]
 }
 
 resource "azurerm_kubernetes_cluster" "cluster" {
@@ -101,7 +101,7 @@ resource "azurerm_kubernetes_cluster" "cluster" {
   }
 
   dynamic "service_principal" {
-    for_each = !var.msi_enabled && var.service_principal_id != "" ? [{
+    for_each = ! var.msi_enabled && var.service_principal_id != "" ? [{
       client_id     = var.service_principal_id
       client_secret = var.service_principal_secret
     }] : []
@@ -134,7 +134,7 @@ resource "azurerm_kubernetes_cluster" "cluster" {
 
   tags = var.tags
 
-  depends_on = [module.subnet]
+  depends_on = [azurerm_subnet.subnet]
 }
 
 data "external" "msi_object_id" {
