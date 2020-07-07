@@ -16,7 +16,7 @@ resource "azurerm_container_registry" "acr" {
 }
 
 resource "null_resource" "store_acr_secrets" {
-  count = "${var.name != "" && var.vault_name != "" ? 1 : 0}"
+  count = var.name != "" && var.vault_name != "" ? 1 : 0
 
   provisioner "local-exec" {
     command = "${path.module}/add_acr_secret.sh -a ${var.name} -v ${var.vault_name} -n ${var.acr_auth_secret_name} -u ${azurerm_container_registry.acr.admin_username} -p $\"{azurerm_container_registry.acr.admin_password}\" -e ${var.email}"

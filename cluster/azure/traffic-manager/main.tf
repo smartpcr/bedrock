@@ -7,7 +7,7 @@ provider "azurerm" {
 }
 
 resource "null_resource" "traffic_manager" {
-  count = "${var.traffic_manager_name != "" && var.traffic_manager_name != "empty" && var.tm_resource_group_name != "" ? 1 : 0}"
+  count = var.traffic_manager_name != "" && var.traffic_manager_name != "empty" && var.tm_resource_group_name != "" ? 1 : 0
 
   provisioner "local-exec" {
     command = "${path.module}/create_traffic_manager.sh -s ${var.tm_subscription_id} -g ${var.tm_resource_group_name} -t ${var.traffic_manager_name} -e \"${var.service_names}\" -u \"${var.service_suffix}\" -z \"${var.dns_zone_name}\" -p \"${var.probe_path}\" -l \"${var.tm_location}\""
@@ -26,7 +26,7 @@ resource "null_resource" "traffic_manager" {
 }
 
 resource "null_resource" "cname_traffic_manager" {
-  count = "${var.traffic_manager_name != "" && var.traffic_manager_name != "empty" && var.service_names != "" ? 1 : 0}"
+  count = var.traffic_manager_name != "" && var.traffic_manager_name != "empty" && var.service_names != "" ? 1 : 0
 
   provisioner "local-exec" {
     command = "${path.module}/add_trafficmanager_to_dns.sh -s ${var.dns_subscription_id} -g ${var.dns_resource_group_name} -z ${var.dns_zone_name} -t ${var.traffic_manager_name} -e \"${var.service_names}\""

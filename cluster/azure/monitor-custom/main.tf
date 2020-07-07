@@ -46,7 +46,7 @@ data "azurerm_application_insights" "app_insights" {
 }
 
 resource "azurerm_monitor_metric_alert" "sev3" {
-  count = "${var.metric_name != "" && var.sev3_enabled == "true" ? 1 : 0}"
+  count = var.metric_name != "" && var.sev3_enabled == "true" ? 1 : 0
 
   name                = "${var.service_name}_${var.metric_name}_sev3"
   resource_group_name = "${var.resource_group_name}"
@@ -73,7 +73,7 @@ resource "azurerm_monitor_metric_alert" "sev3" {
 }
 
 resource "azurerm_monitor_metric_alert" "sev2" {
-  count = "${var.metric_name != "" && var.sev2_enabled == "true" ? 1 : 0}"
+  count = var.metric_name != "" && var.sev2_enabled == "true" ? 1 : 0
 
   name                = "${var.service_name}__${var.metric_name}_sev2"
   resource_group_name = "${var.resource_group_name}"

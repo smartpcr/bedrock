@@ -49,7 +49,7 @@ resource "azurerm_storage_blob" "blob" {
 }
 
 resource "null_resource" "store_storage_account_key" {
-  count = "${var.storage_account != "" && var.vault_name != "" ? 1 : 0}"
+  count = var.storage_account != "" && var.vault_name != "" ? 1 : 0
 
   provisioner "local-exec" {
     command = <<-EOT
@@ -69,5 +69,5 @@ resource "null_resource" "store_storage_account_key" {
     storage_account_key_secret_name = "${var.storage_account_key_secret_name}"
   }
 
-  depends_on = ["azurerm_storage_account.account"]
+  depends_on = [azurerm_storage_account.account]
 }

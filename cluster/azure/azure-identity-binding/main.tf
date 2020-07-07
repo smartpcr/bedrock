@@ -3,11 +3,11 @@ module "azure-provider" {
 }
 
 provider "azurerm" {
-  subscription_id = "${var.subscription_id}"
+  subscription_id = var.subscription_id
 }
 
 resource "null_resource" "azure_identity" {
-  count = "${var.aks_resource_group_name != "" && var.kv_reader_identity_name != "" && var.azure_identity_name != "" && var.k8s_namespace != "" ? 1 : 0}"
+  count = var.aks_resource_group_name != "" && var.kv_reader_identity_name != "" && var.azure_identity_name != "" && var.k8s_namespace != "" ? 1 : 0
 
   provisioner "local-exec" {
     command = <<-EOT
@@ -32,7 +32,7 @@ resource "null_resource" "azure_identity" {
 }
 
 resource "null_resource" "azure_identity_binding" {
-  count = "${var.aks_resource_group_name != "" && var.kv_reader_identity_name != "" && var.azure_identity_name != "" && var.k8s_namespace != "" && var.azure_identity_binding_name != "" ? 1 : 0}"
+  count = var.aks_resource_group_name != "" && var.kv_reader_identity_name != "" && var.azure_identity_name != "" && var.k8s_namespace != "" && var.azure_identity_binding_name != "" ? 1 : 0
 
   provisioner "local-exec" {
     command = <<-EOT
@@ -56,5 +56,5 @@ resource "null_resource" "azure_identity_binding" {
     k8s_namespace               = "${var.k8s_namespace}"
   }
 
-  depends_on = ["null_resource.azure_identity"]
+  depends_on = [null_resource.azure_identity]
 }

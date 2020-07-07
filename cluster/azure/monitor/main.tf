@@ -45,7 +45,7 @@ data "azurerm_application_insights" "app_insights" {
 }
 
 resource "azurerm_monitor_metric_alert" "unhandled_exception_sev3" {
-  count = "${var.unhandled_exception_metric_name != "" && var.sev3_enabled == "true" ? 1 : 0}"
+  count = var.unhandled_exception_metric_name != "" && var.sev3_enabled == "true" ? 1 : 0
 
   name                = "${var.service_name}_unhandled_exception_sev3"
   resource_group_name = "${var.resource_group_name}"
@@ -72,7 +72,7 @@ resource "azurerm_monitor_metric_alert" "unhandled_exception_sev3" {
 }
 
 resource "azurerm_monitor_metric_alert" "unhandled_exception_sev2" {
-  count = "${var.unhandled_exception_metric_name != "" && var.sev2_enabled == "true" ? 1 : 0}"
+  count = var.unhandled_exception_metric_name != "" && var.sev2_enabled == "true" ? 1 : 0
 
   name                = "${var.service_name}_unhandled_exception_sev2"
   resource_group_name = "${var.resource_group_name}"
@@ -99,7 +99,7 @@ resource "azurerm_monitor_metric_alert" "unhandled_exception_sev2" {
 }
 
 resource "azurerm_monitor_metric_alert" "heartbeat_sev3" {
-  count = "${var.heartbeat_metric_name != "" && var.sev3_enabled == "true" ? 1 : 0}"
+  count = var.heartbeat_metric_name != "" && var.sev3_enabled == "true" ? 1 : 0
 
   name                = "${var.service_name}_heartbeat_sev3"
   resource_group_name = "${var.resource_group_name}"
@@ -126,7 +126,7 @@ resource "azurerm_monitor_metric_alert" "heartbeat_sev3" {
 }
 
 resource "azurerm_monitor_metric_alert" "heartbeat_sev2" {
-  count = "${var.heartbeat_metric_name != "" && var.sev2_enabled == "true" ? 1 : 0}"
+  count = var.heartbeat_metric_name != "" && var.sev2_enabled == "true" ? 1 : 0
 
   name                = "${var.service_name}_heartbeat_sev2"
   resource_group_name = "${var.resource_group_name}"
@@ -153,7 +153,7 @@ resource "azurerm_monitor_metric_alert" "heartbeat_sev2" {
 }
 
 resource "azurerm_application_insights_web_test" "ping" {
-  count = "${var.status_url != "" && var.pingable == "true" ? 1 : 0}"
+  count = var.status_url != "" && var.pingable == "true" ? 1 : 0
 
   name                    = "${var.service_name}_webtest"
   location                = "${var.location}"
@@ -175,7 +175,7 @@ XML
 }
 
 resource "azurerm_monitor_metric_alertrule" "availability" {
-  count = "${var.status_url != "" && var.pingable == "true" ? 1 : 0}"
+  count = var.status_url != "" && var.pingable == "true" ? 1 : 0
 
   name                = "${var.service_name}_availability"
   resource_group_name = "${var.resource_group_name}"

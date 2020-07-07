@@ -1,5 +1,5 @@
 resource "null_resource" "cluster_credentials_admin" {
-  count = "${var.kubeconfig_to_disk ? 1 : 0}"
+  count = var.kubeconfig_to_disk ? 1 : 0
 
   provisioner "local-exec" {
     command = <<-EOT
@@ -18,5 +18,5 @@ resource "null_resource" "cluster_credentials_admin" {
     cluster_created     = "${join("",azurerm_kubernetes_cluster.cluster.*.id)}"
   }
 
-  depends_on = ["azurerm_kubernetes_cluster.cluster"]
+  depends_on = [azurerm_kubernetes_cluster.cluster]
 }
