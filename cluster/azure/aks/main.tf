@@ -7,12 +7,12 @@ module "azure-provider" {
 }
 
 provider "azurerm" {
-  subscription_id = "${var.subscription_id}"
+  subscription_id = var.subscription_id
 }
 
 resource "random_id" "workspace" {
   keepers = {
-    group_name = "${var.log_analytics_resource_group_name}"
+    group_name = var.log_analytics_resource_group_name
   }
 
   byte_length = 8
@@ -20,17 +20,17 @@ resource "random_id" "workspace" {
 
 resource "azurerm_log_analytics_workspace" "workspace" {
   name                = "bedrock-k8s-workspace-${random_id.workspace.hex}"
-  location            = "${var.log_analytics_resource_group_location}"
-  resource_group_name = "${var.log_analytics_resource_group_name}"
+  location            = var.log_analytics_resource_group_location
+  resource_group_name = var.log_analytics_resource_group_name
   sku                 = "PerGB2018"
 }
 
 resource "azurerm_log_analytics_solution" "solution" {
   solution_name         = "ContainerInsights"
-  location              = "${var.log_analytics_resource_group_location}"
-  resource_group_name   = "${var.log_analytics_resource_group_name}"
-  workspace_resource_id = "${azurerm_log_analytics_workspace.workspace.id}"
-  workspace_name        = "${azurerm_log_analytics_workspace.workspace.name}"
+  location              = var.log_analytics_resource_group_location
+  resource_group_name   = var.log_analytics_resource_group_name
+  workspace_resource_id = azurerm_log_analytics_workspace.workspace.id
+  workspace_name        = azurerm_log_analytics_workspace.workspace.name
 
   plan {
     publisher = "Microsoft"
@@ -60,24 +60,24 @@ module "subnet" {
 }
 
 resource "azurerm_kubernetes_cluster" "cluster" {
-  name                = "${var.cluster_name}"
-  location            = "${var.aks_resource_group_location}"
-  resource_group_name = "${var.aks_resource_group_name}"
-  dns_prefix          = "${var.dns_prefix}"
-  kubernetes_version  = "${var.kubernetes_version}"
+  name                = var.cluster_name
+  location            = var.aks_resource_group_location
+  resource_group_name = var.aks_resource_group_name
+  dns_prefix          = var.dns_prefix
+  kubernetes_version  = var.kubernetes_version
 
   linux_profile {
-    admin_username = "${var.admin_user}"
+    admin_username = var.admin_user
 
     ssh_key {
-      key_data = "${var.ssh_public_key}"
+      key_data = var.ssh_public_key
     }
   }
 
   default_node_pool {
     name            = "default"
-    count           = "${var.agent_vm_count}"
-    vm_size         = "${var.agent_vm_size}"
+    node_count      = var.agent_vm_count
+    vm_size         = var.agent_vm_size
     os_type         = "Linux"
     os_disk_size_gb = 30
     vnet_subnet_id  = tostring(element(module.subnet.subnet_ids, 0))
@@ -95,9 +95,9 @@ resource "azurerm_kubernetes_cluster" "cluster" {
     enabled = true
 
     azure_active_directory {
-      server_app_id     = "${var.server_app_id}"
-      server_app_secret = "${var.server_app_secret}"
-      client_app_id     = "${var.client_app_id}"
+      server_app_id     = var.server_app_id
+      server_app_secret = var.server_app_secret
+      client_app_id     = var.client_app_id
     }
   }
 
@@ -114,12 +114,12 @@ resource "azurerm_kubernetes_cluster" "cluster" {
 
   addon_profile {
     oms_agent {
-      enabled                    = "${var.oms_agent_enabled}"
-      log_analytics_workspace_id = "${azurerm_log_analytics_workspace.workspace.id}"
+      enabled                    = var.oms_agent_enabled
+      log_analytics_workspace_id = "${azurerm_log_analytics_workspace.workspace.id
     }
 
     http_application_routing {
-      enabled = "${var.enable_http_application_routing}"
+      enabled = var.enable_http_application_routing
     }
   }
 
