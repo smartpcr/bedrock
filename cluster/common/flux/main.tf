@@ -21,8 +21,6 @@ resource "null_resource" "deploy_flux" {
     gitops_ssh_key            = var.gitops_ssh_key
     flux_clone_dir            = var.flux_clone_dir
     acr_enabled               = var.acr_enabled
-    create_helm_operator      = var.create_helm_operator
-    create_helm_operator_crds = var.create_helm_operator_crds
     git_label                 = var.git_label
   }
 }
