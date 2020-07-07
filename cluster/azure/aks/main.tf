@@ -53,9 +53,9 @@ module "vnet" {
 module "subnet" {
   source = "../../../cluster/azure/subnet"
 
+  resource_group_name  = var.aks_resource_group_name
   subnet_name          = ["${var.cluster_name}-aks-subnet"]
   vnet_name            = module.vnet.vnet_name
-  resource_group_name  = var.aks_resource_group_name
   address_prefix       = [var.subnet_prefix]
 }
 
@@ -133,6 +133,8 @@ resource "azurerm_kubernetes_cluster" "cluster" {
   }
 
   tags = var.tags
+
+  depends_on = [module.subnet]
 }
 
 data "external" "msi_object_id" {
