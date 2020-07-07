@@ -38,6 +38,27 @@ resource "azurerm_log_analytics_solution" "solution" {
   }
 }
 
+module "vnet" {
+  source = "../../../cluster/azure/vnet"
+
+  resource_group_name     = var.aks_resource_group_name
+  vnet_name               = "${var.cluster_name}-aks-vnet"
+  address_space           = var.address_space
+
+  tags = {
+    environment = "aks-vnet"
+  }
+}
+
+module "subnet" {
+  source = "../../../cluster/azure/subnet"
+
+  subnet_name          = ["${var.cluster_name}-aks-subnet"]
+  vnet_name            = module.vnet.vnet_name
+  resource_group_name  = var.aks_resource_group_name
+  address_prefix       = [var.subnet_prefix]
+}
+
 resource "azurerm_kubernetes_cluster" "cluster" {
   name                = "${var.cluster_name}"
   location            = "${var.aks_resource_group_location}"
@@ -59,7 +80,7 @@ resource "azurerm_kubernetes_cluster" "cluster" {
     vm_size         = "${var.agent_vm_size}"
     os_type         = "Linux"
     os_disk_size_gb = 30
-    vnet_subnet_id  = var.vnet_subnet_id
+    vnet_subnet_id  = tostring(element(module.subnet.subnet_ids, 0))
   }
 
   network_profile {

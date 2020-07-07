@@ -253,3 +253,15 @@ variable "aks_reader_groups" {
   description = "comma separated aad group object id who are readers to aks"
   default = ""
 }
+
+variable "msi_enabled" {
+  type = bool
+  default = false
+}
+
+variable "tags" {
+  description = "The tags to associate with aks"
+  type        = map
+
+  default = {}
+}

@@ -1,5 +1,5 @@
 variable "subscription_id" {
-  type = string
+  type        = string
   description = "azure subscription id where app insights is created"
 }
 
@@ -86,10 +86,6 @@ variable "ssh_public_key" {
   type = string
 }
 
-variable "vnet_subnet_id" {
-  type = string
-}
-
 variable "output_directory" {
   type    = string
   default = "./output"
@@ -141,6 +137,16 @@ variable "docker_cidr" {
   description = "IP address (in CIDR notation) used as the Docker bridge IP address on nodes. Default of 172.17.0.1/16."
 }
 
+variable "address_space" {
+  description = "The address space that is used by the virtual network."
+  default     = "10.10.0.0/16"
+}
+
+variable "subnet_prefix" {
+  description = "The address prefix to use for the subnet."
+  default     = "10.10.1.0/24"
+}
+
 variable "network_policy" {
   default     = "azure"
   description = "Network policy to be used with Azure CNI. Either azure or calico."
@@ -168,12 +174,12 @@ variable "enable_dev_spaces" {
 }
 
 variable "dev_space_name" {
-  type = string
+  type    = string
   default = "dev"
 }
 
 variable "msi_enabled" {
-  type = bool
+  type    = bool
   default = false
 }
 
