@@ -4,10 +4,5 @@ resource "local_file" "cluster_credentials" {
   sensitive_content = azurerm_kubernetes_cluster.cluster.kube_config_raw
   filename          = "${var.output_directory}/${var.kubeconfig_filename}"
 
-  triggers = {
-    kubeconfig_to_disk  = "${var.kubeconfig_to_disk}"
-    kubeconfig_recreate = "${var.kubeconfig_recreate}"
-  }
-
   depends_on = [azurerm_kubernetes_cluster.cluster]
 }
