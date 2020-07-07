@@ -56,7 +56,7 @@ resource "azurerm_subnet" "subnet" {
   resource_group_name  = var.aks_resource_group_name
   address_prefix       = var.subnet_prefix
   service_endpoints    = []
-  depends_on           = [azurerm_virtual_network.subnet]
+  depends_on           = [azurerm_virtual_network.vnet]
 }
 
 resource "azurerm_kubernetes_cluster" "cluster" {
