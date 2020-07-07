@@ -3,16 +3,16 @@ module "azure-provider" {
 }
 
 provider "azurerm" {
-  subscription_id = "${var.subscription_id}"
+  subscription_id = var.subscription_id
 }
 
 resource "azurerm_container_registry" "acr" {
-  name                     = "${var.name}"
-  resource_group_name      = "${var.resource_group_name}"
-  location                 = "${var.location}"
+  name                     = var.name
+  resource_group_name      = var.resource_group_name
+  location                 = var.location
   sku                      = "Premium"
   admin_enabled            = true
-  georeplication_locations = ["${var.alternate_location}"]
+  georeplication_locations = [var.alternate_location]
 }
 
 resource "null_resource" "store_acr_secrets" {
@@ -23,8 +23,8 @@ resource "null_resource" "store_acr_secrets" {
   }
 
   triggers = {
-    name       = "${var.name}"
-    vault_name = "${var.vault_name}"
+    name       = var.name
+    vault_name = var.vault_name
   }
 
   depends_on = ["azurerm_container_registry.acr"]
