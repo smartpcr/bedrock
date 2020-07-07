@@ -30,6 +30,16 @@ variable "cluster_name" {
   default = "bedrockaks"
 }
 
+variable "node_resource_group" {
+  type = string
+  default = "bedrockaks-workers"
+}
+
+variable "api_auth_ips" {
+  description = "Whitelist of IP addresses that are allowed to access the AKS Master Control Plane API"
+  type        = list(string)
+}
+
 variable "dns_prefix" {
   type = string
 }

@@ -13,6 +13,8 @@ module "aks" {
   aks_resource_group_location           = var.aks_resource_group_location
   cluster_name                          = var.cluster_name
   kubernetes_version                    = var.kubernetes_version
+  node_resource_group                   = var.node_resource_group
+  api_auth_ips                          = var.api_auth_ips
   agent_vm_count                        = var.agent_vm_count
   agent_vm_size                         = var.agent_vm_size
   dns_prefix                            = var.dns_prefix

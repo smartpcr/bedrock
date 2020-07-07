@@ -59,11 +59,13 @@ resource "azurerm_subnet" "subnet" {
 }
 
 resource "azurerm_kubernetes_cluster" "cluster" {
-  name                = var.cluster_name
-  location            = var.aks_resource_group_location
-  resource_group_name = var.aks_resource_group_name
-  dns_prefix          = var.dns_prefix
-  kubernetes_version  = var.kubernetes_version
+  name                            = var.cluster_name
+  location                        = var.aks_resource_group_location
+  resource_group_name             = var.aks_resource_group_name
+  dns_prefix                      = var.dns_prefix
+  kubernetes_version              = var.kubernetes_version
+  node_resource_group             = var.node_resource_group
+  api_server_authorized_ip_ranges = var.api_auth_ips
 
   linux_profile {
     admin_username = var.admin_user
@@ -118,6 +120,14 @@ resource "azurerm_kubernetes_cluster" "cluster" {
 
     http_application_routing {
       enabled = var.enable_http_application_routing
+    }
+
+    kube_dashboard {
+      enabled = true
+    }
+
+    azure_policy {
+      enabled = true
     }
   }
 

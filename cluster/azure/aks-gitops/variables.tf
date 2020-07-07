@@ -17,7 +17,7 @@ variable "log_analytics_name" {
 # aks                                                      #
 ############################################################
 variable "subscription_id" {
-  type = string
+  type        = string
   description = "azure subscription id where app insights is created"
 }
 
@@ -44,7 +44,18 @@ variable "cluster_name" {
 
 variable "kubernetes_version" {
   type    = string
-  default = "1.13.10"
+  default = "1.16.9"
+}
+
+variable "node_resource_group" {
+  type    = string
+  default = "bedrockaks-workers"
+}
+
+variable "api_auth_ips" {
+  description = "Whitelist of IP addresses that are allowed to access the AKS Master Control Plane API"
+  type        = list(string)
+  default     = []
 }
 
 variable "dns_prefix" {
@@ -167,19 +178,19 @@ variable "gitops_url_branch" {
 }
 
 variable "create_helm_operator" {
-  type = string
+  type        = string
   description = "create helm operator"
 }
 
 variable "create_helm_operator_crds" {
-  type = string
+  type        = string
   description = "create CRDs associated with helm operator"
 }
 
 variable "git_label" {
-  type = string
+  type        = string
   description = "comma-separated list of labels to be applied to git commit (in addition to flux-sync)"
-  default = ""
+  default     = ""
 }
 
 ############################################################
@@ -206,7 +217,7 @@ variable "enable_dev_spaces" {
 }
 
 variable "dev_space_name" {
-  type = string
+  type    = string
   default = "dev"
 }
 
@@ -219,43 +230,43 @@ variable "dashboard_cluster_role" {
 # rbac                                                     #
 ############################################################
 variable "aks_owners" {
-  type = string
+  type        = string
   description = "comma separated aad user object id who are granted to cluster cluster admins"
-  default = ""
+  default     = ""
 }
 
 variable "aks_contributors" {
-  type = string
+  type        = string
   description = "comma separated aad user object id who are contributors to aks"
-  default = ""
+  default     = ""
 }
 
 variable "aks_readers" {
-  type = string
+  type        = string
   description = "comma separated aad user object id who are readers to aks"
-  default = ""
+  default     = ""
 }
 
 variable "aks_owner_groups" {
-  type = string
+  type        = string
   description = "comma separated aad group object id who are granted to cluster cluster admins"
-  default = ""
+  default     = ""
 }
 
 variable "aks_contributor_groups" {
-  type = string
+  type        = string
   description = "comma separated aad group object id who are contributors to aks"
-  default = ""
+  default     = ""
 }
 
 variable "aks_reader_groups" {
-  type = string
+  type        = string
   description = "comma separated aad group object id who are readers to aks"
-  default = ""
+  default     = ""
 }
 
 variable "msi_enabled" {
-  type = bool
+  type    = bool
   default = false
 }
 
