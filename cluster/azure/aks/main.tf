@@ -80,7 +80,7 @@ resource "azurerm_kubernetes_cluster" "cluster" {
   # change that should result in an update to the cluster causes a replacement.
   windows_profile {
     admin_username = "azureuser"
-    admin_password = "Adm1nPa33++"
+    admin_password = "FakePassword:Adm1nPa33++"
   }
 
   default_node_pool {
