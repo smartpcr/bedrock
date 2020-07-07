@@ -142,6 +142,12 @@ variable "address_space" {
   default     = "10.10.0.0/16"
 }
 
+variable "network_plugin" {
+  default     = "azure"
+  type        = string
+  description = "Network plugin used by AKS. Either azure or kubenet."
+}
+
 variable "subnet_prefix" {
   description = "The address prefix to use for the subnet."
   default     = "10.10.1.0/24"
