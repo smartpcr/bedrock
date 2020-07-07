@@ -51,7 +51,7 @@ fetch_helm () {
   cd -
 }
 
-while getopts :b:f:g:k:d:e:c:s:r:t:z:h:i:l: option
+while getopts :b:f:g:k:d:e:c:s:r:t:z:l: option
 do
  case "${option}" in
  b) GITOPS_URL_BRANCH=${OPTARG};;
@@ -65,8 +65,6 @@ do
  r) FLUX_IMAGE_REPOSITORY=${OPTARG};;
  t) FLUX_IMAGE_TAG=${OPTARG};;
  z) GC_ENABLED=${OPTARG};;
- h) CREATE_HELM_OPERATOR=${OPTARG};;
- i) CREATE_CRDS=${OPTARG};;
  l) GIT_LABEL=${OPTARG};;
  *) echo "Please refer to usage guide on GitHub" >&2
     exit 1 ;;
@@ -131,8 +129,6 @@ if ! $HELM_BIN template $RELEASE_NAME . \
     --set git.label="$GIT_LABEL" \
     --set registry.acr.enabled="$ACR_ENABLED" \
     --set syncGarbageCollection.enabled="$GC_ENABLED" \
-    --set helmOperator.create="$CREATE_HELM_OPERATOR" \
-    --set helmOperator.createCRD="CREATE_CRDS" \
     --set git.setAuthor="true" \
     --set serviceAccount.name="flux"; then
     echo "ERROR: failed to helm template"

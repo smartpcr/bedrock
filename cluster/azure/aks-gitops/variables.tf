@@ -177,16 +177,6 @@ variable "gitops_url_branch" {
   type = string
 }
 
-variable "create_helm_operator" {
-  type        = string
-  description = "create helm operator"
-}
-
-variable "create_helm_operator_crds" {
-  type        = string
-  description = "create CRDs associated with helm operator"
-}
-
 variable "git_label" {
   type        = string
   description = "comma-separated list of labels to be applied to git commit (in addition to flux-sync)"
