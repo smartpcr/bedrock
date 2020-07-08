@@ -75,6 +75,20 @@ resource "azurerm_kubernetes_cluster" "cluster" {
     }
   }
 
+  # The windows_profile block should be optional.  However, there is a bug in the Terraform Azure provider
+  # that does not treat this block as optional -- even if no windows nodes are used.  If not present, any
+  # change that should result in an update to the cluster causes a replacement.
+  windows_profile {
+    admin_username = "azureuser"
+    admin_password = "Adm1nPa33++"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      default_node_pool[0].node_count
+    ]
+  }
+
   default_node_pool {
     name            = "default"
     node_count      = var.agent_vm_count
@@ -98,6 +112,7 @@ resource "azurerm_kubernetes_cluster" "cluster" {
       server_app_id     = var.server_app_id
       server_app_secret = var.server_app_secret
       client_app_id     = var.client_app_id
+      tenant_id         = var.tenant_id
     }
   }
 
@@ -151,7 +166,7 @@ data "external" "msi_object_id" {
   program = [
     "${path.module}/aks_msi_client_id_query.sh",
     var.cluster_name,
-    var.cluster_name,
+    var.aks_resource_group_name,
     var.subscription_id
   ]
 }
