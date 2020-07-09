@@ -58,6 +58,26 @@ resource "azurerm_subnet" "subnet" {
   depends_on           = [azurerm_virtual_network.vnet]
 }
 
+resource "azurerm_subnet" "virtualnodesubnet" {
+  count                = var.enable_virtual_node_addon ? 1 : 0
+  name                 = "aks-virtualnodes"
+  virtual_network_name = "aks-vnet"
+  resource_group_name  = var.aks_resource_group_name
+  address_prefix       = var.virtualnodes_subnet_prefix
+  service_endpoints    = []
+  depends_on           = [azurerm_virtual_network.vnet]
+
+  # Designate subnet to be used by ACI
+  delegation {
+    name = "aci-delegation"
+
+    service_delegation {
+      name    = "Microsoft.ContainerInstance/containerGroups"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+    }
+  }
+}
+
 resource "azurerm_kubernetes_cluster" "cluster" {
   name                            = var.cluster_name
   location                        = var.aks_resource_group_location
@@ -159,7 +179,7 @@ resource "azurerm_kubernetes_cluster" "cluster" {
 
   tags = var.tags
 
-  depends_on = [azurerm_subnet.subnet]
+  depends_on = [azurerm_subnet.subnet, azurerm_subnet.virtualnodesubnet]
 }
 
 data "external" "msi_object_id" {
@@ -170,4 +190,21 @@ data "external" "msi_object_id" {
     var.aks_resource_group_name,
     var.subscription_id
   ]
+}
+
+# Grant AKS cluster access to join AKS subnet
+resource "azurerm_role_assignment" "aks_subnet" {
+  scope                = "${azurerm_subnet.subnet.id}"
+  role_definition_name = "Network Contributor"
+  principal_id         = var.service_principal_object_id
+  depends_on = [azurerm_subnet.subnet]
+}
+
+# Grant AKS cluster access to join ACI subnet
+resource "azurerm_role_assignment" "aci_subnet" {
+  count                = var.enable_virtual_node_addon ? 1 : 0
+  scope                = "${azurerm_subnet.virtualnodesubnet.id}"
+  role_definition_name = "Network Contributor"
+  principal_id         = var.service_principal_object_id
+  depends_on = [azurerm_subnet.virtualnodesubnet]
 }

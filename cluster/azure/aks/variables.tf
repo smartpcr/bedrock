@@ -46,10 +46,16 @@ variable "dns_prefix" {
 
 variable "service_principal_id" {
   type = string
+  description = "app id of aks service principal"
 }
 
 variable "service_principal_secret" {
   type = string
+}
+
+variable "service_principal_object_id" {
+  type = string
+  description = "object_id/principal_id of aks service principal"
 }
 
 variable "server_app_id" {
@@ -99,11 +105,6 @@ variable "ssh_public_key" {
 variable "output_directory" {
   type    = string
   default = "./output"
-}
-
-variable "enable_virtual_node_addon" {
-  type    = string
-  default = "false"
 }
 
 variable "kubeconfig_to_disk" {
@@ -161,6 +162,16 @@ variable "network_plugin" {
 variable "subnet_prefix" {
   description = "The address prefix to use for the subnet."
   default     = "10.10.1.0/24"
+}
+
+variable "enable_virtual_node_addon" {
+  type    = string
+  default = "false"
+}
+
+variable "virtualnodes_subnet_prefix" {
+  description = "The address prefix to use for the subnet."
+  default     = "10.10.2.0/24"
 }
 
 variable "network_policy" {

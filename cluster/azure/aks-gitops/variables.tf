@@ -70,6 +70,11 @@ variable "service_principal_secret" {
   type = string
 }
 
+variable "service_principal_object_id" {
+  type = string
+  description = "object_id/principal_id of aks service principal"
+}
+
 variable "server_app_id" {
   type        = string
   description = "(Required) The Server ID of an Azure Active Directory Application. Changing this forces a new resource to be created."
@@ -109,6 +114,11 @@ variable "dns_ip" {
 variable "docker_cidr" {
   default     = "172.17.0.1/16"
   description = "IP address (in CIDR notation) used as the Docker bridge IP address on nodes. Default of 172.17.0.1/16."
+}
+
+variable "enable_virtual_node_addon" {
+  type    = string
+  default = "false"
 }
 
 variable "kubeconfig_filename" {

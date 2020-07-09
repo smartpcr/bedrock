@@ -6,5 +6,5 @@ resource "null_resource" "enable_virtual_node_addon" {
     command = "az aks enable-addons --resource-group ${var.aks_resource_group_name} --name ${var.cluster_name} --addons virtual-node --subnet-name ${var.cluster_name}-virtual-node-subnet"
   }
 
-  depends_on = [azurerm_kubernetes_cluster.cluster]
+  depends_on = [azurerm_kubernetes_cluster.cluster,azurerm_subnet.virtualnodesubnet]
 }

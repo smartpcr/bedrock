@@ -22,6 +22,7 @@ module "aks" {
   msi_enabled                           = var.msi_enabled
   service_principal_id                  = var.service_principal_id
   service_principal_secret              = var.service_principal_secret
+  service_principal_object_id           = var.service_principal_object_id
   server_app_id                         = var.server_app_id
   server_app_secret                     = var.server_app_secret
   client_app_id                         = var.client_app_id
@@ -36,6 +37,7 @@ module "aks" {
   enable_http_application_routing       = var.enable_http_application_routing
   enable_azure_monitoring               = var.enable_azure_monitoring
   enable_dev_spaces                     = var.enable_dev_spaces
+  enable_virtual_node_addon             = var.enable_virtual_node_addon
   tags                                  = var.tags
 }
 
