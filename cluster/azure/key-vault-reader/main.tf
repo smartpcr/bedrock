@@ -3,7 +3,7 @@ module "azure-provider" {
 }
 
 provider "azurerm" {
-  subscription_id = "${var.aks_subscription_id}"
+  subscription_id = var.aks_subscription_id
 }
 
 data "azurerm_client_config" "current" {}
@@ -16,10 +16,10 @@ resource "null_resource" "keyvault_reader" {
   }
 
   triggers = {
-    aks_subscription_id   = "${var.aks_subscription_id}"
-    vault_subscription_id = "${var.vault_subscription_id}"
-    vault_reader_identity = "${var.vault_reader_identity}"
-    vault_name            = "${var.vault_name}"
+    aks_subscription_id   = var.aks_subscription_id
+    vault_subscription_id = var.vault_subscription_id
+    vault_reader_identity = var.vault_reader_identity
+    vault_name            = var.vault_name
   }
 
 }

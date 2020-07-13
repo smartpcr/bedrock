@@ -3,7 +3,7 @@ module "azure-provider" {
 }
 
 provider "azurerm" {
-  subscription_id = "${var.aks_subscription_id}"
+  subscription_id = var.aks_subscription_id
 }
 
 resource "null_resource" "create_k8s_configmap" {
@@ -14,13 +14,13 @@ resource "null_resource" "create_k8s_configmap" {
   }
 
   triggers = {
-    aks_subscription_id      = "${var.aks_subscription_id}"
-    k8s_namespace            = "${var.k8s_namespace}"
-    k8s_configmap_name       = "${var.k8s_configmap_name}"
-    k8s_configmap_keys       = "${var.k8s_configmap_keys}"
-    vault_subscription_id    = "${var.vault_subscription_id}"
-    key_vault_name           = "${var.key_vault_name}"
-    key_vault_secret_names   = "${var.key_vault_secret_names}"
-    key_vault_secret_version = "${var.key_vault_secret_version}"
+    aks_subscription_id      = var.aks_subscription_id
+    k8s_namespace            = var.k8s_namespace
+    k8s_configmap_name       = var.k8s_configmap_name
+    k8s_configmap_keys       = var.k8s_configmap_keys
+    vault_subscription_id    = var.vault_subscription_id
+    key_vault_name           = var.key_vault_name
+    key_vault_secret_names   = var.key_vault_secret_names
+    key_vault_secret_version = var.key_vault_secret_version
   }
 }

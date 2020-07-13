@@ -19,9 +19,9 @@ resource "null_resource" "deploy_flexvol" {
   }
 
   triggers = {
-    aks_subscription_id = "${var.aks_subscription_id}"
-    env_name            = "${var.env_name}"
-    flexvol_version     = "${var.flexvol_version}"
-    flexvol_namespace   = "${var.flexvol_namespace}"
+    aks_subscription_id = var.aks_subscription_id
+    env_name            = var.env_name
+    flexvol_version     = var.flexvol_version
+    flexvol_namespace   = var.flexvol_namespace
   }
 }

@@ -203,7 +203,7 @@ data "external" "msi_object_id" {
 # # Grant AKS cluster access to join ACI subnet
 # resource "azurerm_role_assignment" "aci_subnet" {
 #   count                = var.enable_virtual_node_addon ? 1 : 0
-#   scope                = "${azurerm_subnet.virtualnodesubnet.id}"
+#   scope                = "${azurerm_subnet.virtualnodesubnet[0].id}"
 #   role_definition_name = "Network Contributor"
 #   principal_id         = var.service_principal_object_id
 #   depends_on           = [azurerm_subnet.virtualnodesubnet]
