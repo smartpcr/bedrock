@@ -192,19 +192,19 @@ data "external" "msi_object_id" {
   ]
 }
 
-# Grant AKS cluster access to join AKS subnet
-resource "azurerm_role_assignment" "aks_subnet" {
-  scope                = "${azurerm_subnet.subnet.id}"
-  role_definition_name = "Network Contributor"
-  principal_id         = var.service_principal_object_id
-  depends_on = [azurerm_subnet.subnet]
-}
+# # Grant AKS cluster access to join AKS subnet
+# resource "azurerm_role_assignment" "aks_subnet" {
+#   scope                = "${azurerm_subnet.subnet.id}"
+#   role_definition_name = "Network Contributor"
+#   principal_id         = var.service_principal_object_id
+#   depends_on           = [azurerm_subnet.subnet]
+# }
 
-# Grant AKS cluster access to join ACI subnet
-resource "azurerm_role_assignment" "aci_subnet" {
-  count                = var.enable_virtual_node_addon ? 1 : 0
-  scope                = "${azurerm_subnet.virtualnodesubnet.id}"
-  role_definition_name = "Network Contributor"
-  principal_id         = var.service_principal_object_id
-  depends_on = [azurerm_subnet.virtualnodesubnet]
-}
+# # Grant AKS cluster access to join ACI subnet
+# resource "azurerm_role_assignment" "aci_subnet" {
+#   count                = var.enable_virtual_node_addon ? 1 : 0
+#   scope                = "${azurerm_subnet.virtualnodesubnet.id}"
+#   role_definition_name = "Network Contributor"
+#   principal_id         = var.service_principal_object_id
+#   depends_on           = [azurerm_subnet.virtualnodesubnet]
+# }
