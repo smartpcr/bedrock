@@ -69,7 +69,7 @@ kind: AzureIdentityBinding
 metadata:
     name: $AzureIdentityBindingName
 spec:
-    AzureIdentity: $AzureIdentityName
-    Selector: $KVReaderIdentityName
+    azureIdentity: $AzureIdentityName
+    selector: $KVReaderIdentityName
 "@
 $azureIdentityBindingYaml | kubectl apply --namespace $AzureBindingKubeNamespace -f -

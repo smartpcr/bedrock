@@ -43,7 +43,7 @@ metadata:
     name: $AzureIdentityName
 spec:
     type: 0
-    ResourceID: $($userAssignedIdentity.id)
-    ClientId: $($userAssignedIdentity.clientId)
+    resourceID: $($userAssignedIdentity.id)
+    clientId: $($userAssignedIdentity.clientId)
 "@
 $azureIdentityYaml | kubectl apply --namespace $AzureBindingKubeNamespace -f -
