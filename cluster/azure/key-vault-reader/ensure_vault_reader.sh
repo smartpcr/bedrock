@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-while getopts :a:b:v:n:g:a:c:s:l: option
+while getopts :a:b:v:n:g:r:c:s:l: option
 do
     case "${option}" in
         a) AKS_SUBSCRIPTION_ID=${OPTARG};;
@@ -8,6 +8,7 @@ do
         v) VAULT_NAME=${OPTARG};;
         n) IDENTITY_NAME=${OPTARG};;
         g) RESOURCE_GROUP_NAME=${OPTARG};;
+        r) NODE_RESOURCE_GROUP_NAME=${OPTARG};;
         c) AKS_CLUSTER_NAME=${OPTARG};;
         s) AKS_SPN_OBJECT_ID=${OPTARG};;
         l) AKS_CLUSTER_LOCATION=${OPTARG};;
@@ -63,7 +64,7 @@ RESOURCE_GROUP_ID=$(az group show -n "$RESOURCE_GROUP_NAME" | jq '.id' | sed -e 
 echo "AKS resource group id: $RESOURCE_GROUP_ID"
 
 UNDERSCORE="_"
-AKS_NODE_RESOURCE_GROUP="MC$UNDERSCORE$RESOURCE_GROUP_NAME$UNDERSCORE$AKS_CLUSTER_NAME$UNDERSCORE$AKS_CLUSTER_LOCATION"
+AKS_NODE_RESOURCE_GROUP=$NODE_RESOURCE_GROUP_NAME
 AKS_NODE_RESOURCE_GROUP_ID=$(az group show -n "$AKS_NODE_RESOURCE_GROUP" | jq '.id' | sed -e 's/^"//' -e 's/"$//')
 echo "MC resource group id: $AKS_NODE_RESOURCE_GROUP_ID"
 

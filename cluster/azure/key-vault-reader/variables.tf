@@ -11,6 +11,10 @@ variable "resource_group_name" {
   description = "Default resource group name that the network will be created in."
 }
 
+variable "node_resource_group_name" {
+  description = "resource group that contains default node pool for aks."
+}
+
 variable "location" {
   description = "The location/region where the core network will be created. The full list of Azure regions can be found at https://azure.microsoft.com/regions"
   type        = string
