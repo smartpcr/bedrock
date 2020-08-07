@@ -27,7 +27,7 @@ variable "env_name" {
 
 variable "pod_identity_version" {
   type    = string
-  default = "1.5.3"
+  default = "1.6.2"
 }
 
 variable "pod_identity_namespace" {

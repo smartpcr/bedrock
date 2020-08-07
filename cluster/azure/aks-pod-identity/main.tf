@@ -3,7 +3,7 @@ module "azure-provider" {
 }
 
 provider "azurerm" {
-  subscription_id = "${var.subscription_id}"
+  subscription_id = ${var.subscription_id}
 }
 
 resource "null_resource" "pod_identity" {
@@ -22,9 +22,9 @@ resource "null_resource" "pod_identity" {
   }
 
   triggers = {
-    env_name               = "${var.env_name}"
-    pod_identity_version   = "${var.pod_identity_version}"
-    pod_identity_namespace = "${var.pod_identity_namespace}"
-    kvreader_created       = "${var.kvreader_created}"
+    env_name               = var.env_name
+    pod_identity_version   = var.pod_identity_version
+    pod_identity_namespace = var.pod_identity_namespace
+    kvreader_created       = var.kvreader_created
   }
 }
